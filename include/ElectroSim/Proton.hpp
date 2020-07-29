@@ -5,8 +5,8 @@
 
 class Proton : public Particle {
 public:
-Proton(int x, int y, int radius);
-void render();
+    Proton(int x, int y, float radius);
+    void render();
 };
 
 #endif // ifndef PROTON_HPP

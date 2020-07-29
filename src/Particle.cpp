@@ -1,6 +1,7 @@
 #include <ElectroSim/Particle.hpp>
 
-Particle::Particle(int x, int y, int radius) {
+// Constructor
+Particle::Particle(float x, float y, float radius) {
     mX = x;
     mY = y;
     mVelX = 0;
@@ -9,8 +10,11 @@ Particle::Particle(int x, int y, int radius) {
     mAccY = 0;
     mRadius = radius;
     mMass = PI * radius * radius * DENSITY;
+    calcIndices();
+    calcPoints();
 }
 
+// Copy constructor
 Particle::Particle(const Particle& p) {
     mX = p.mX;
     mY = p.mY;
@@ -20,8 +24,15 @@ Particle::Particle(const Particle& p) {
     mAccY = p.mAccY;
     mRadius = p.mRadius;
     mMass = p.mMass;
+    for(int i = 0; i < 3 * (RESOLUTION - 2); i++){
+        mIndices[i] = p.mIndices[i];
+    }
+    for(int i = 0; i < 2 * RESOLUTION; i++){
+        mPoints[i] = p.mPoints[i];
+    }
 }
 
+// Calculate and apply forces between self and another Particle
 void Particle::applyForces(Particle& p) {
     // If the particle doesnt have a charge there is no force
 
@@ -44,6 +55,7 @@ void Particle::applyForces(Particle& p) {
     p.mAccY += dy / dist * (force / p.mMass);
 }
 
+// Calculate and apply collisions between self and another Particle
 void Particle::collide(Particle& p) {
     // Figure out distance between particles
     float dx = mX - p.mX;
@@ -88,6 +100,26 @@ void Particle::collide(Particle& p) {
     p.mVelY = ELASTICITY * (ty * dpTan2 + ny * m2);
 }
 
+//
+void Particle::calcPoints(){
+    if (mRadius == 0) return;
+    int index = 0;
+    double step = 360 / RESOLUTION;
+    for(int i = 0; i < 360; i += step){
+        mPoints[index] = mRadius * cos(i * PI / 180) + mX;
+        mPoints[index + 1] = mRadius * sin(i * PI / 180) + mY;
+        index += 2;
+    }
+}
+
+void Particle::calcIndices(){
+    for(int i = 0; i < RESOLUTION - 2; i++){
+        mIndices[i * 3] = 0;
+        mIndices[i * 3 + 1] = i + 1;
+        mIndices[i * 3 + 2] = i + 2;
+    }
+}
+
 void Particle::tick() {
     mAccX -= mVelX * FRICTION;
     mAccY -= mVelY * FRICTION;
@@ -95,10 +127,15 @@ void Particle::tick() {
     mVelY += mAccY;
     mX += mVelX;
     mY += mVelY;
+    for(int i = 0; i < RESOLUTION / 2; i++){
+        mPoints[i * 2] += mVelX;
+        mPoints[i * 2 + 1] += mVelY;
+    }
     mAccX = 0;
     mAccY = 0;
 }
 
+// Test function until implementation of graphics
 void Particle::test() {
     std::cout << "X: " << mX << " " << mVelX << " " << mAccX << "\n" << "Y: " << mY << " " << mVelY << " " << mAccY << "\n\n";
 }

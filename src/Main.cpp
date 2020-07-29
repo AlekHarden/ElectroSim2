@@ -11,6 +11,7 @@
 #include <nano/nano.hpp>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ElectroSim/Proton.hpp>
 
 void test() {
 	std::cout << "yo from thread" << std::endl;
@@ -22,10 +23,8 @@ std::string ReadShaderFile(std::string filepath) {
 	std::string shaderSource;
 	FILE *file = fopen(filepath.c_str(), "r");
 
-	if (file == NULL) {
-		std::cout << "works";
-		return "hello bithch";
-	}
+	// Error checking
+	if (file == NULL) throw("ERROR: File \"" + filepath + "\" does not exist\n");
 
 	//fgetc eats first character so you have to set c bullshit and append it later
 	while ((cbullshit = fgetc(file)) != EOF) {
@@ -107,23 +106,34 @@ int main(void) {
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	/* Loop until the user closes the window */
 
+	Proton p(0, 0, 0.5);
+	// for(int i = 0; i < RESOLUTION - 2; i++){
+    //      std::cout << p.mIndices[i * 3] << ", " << p.mIndices[i * 3 + 1] << ", " << p.mIndices[i * 3 + 2] << std::endl;
+    // }
+	// std::cout << std::endl;
+	// for(int i = 0; i < RESOLUTION; i++){
+    //     std::cout << p.mPoints[i * 2] << ", " << p.mPoints[i * 2 + 1] << std::endl;
+    // }
+
+	std::cout << "size of indices " << *(&p.mIndices + 1) - p.mIndices;
+
 	float positions[] = {
-		-1.0, -0.5,
-		0.0,  1.0,
+		-0.5, -0.5,
 		0.5,  -0.5,
-		-1.0, -1.0
+		0.5,  0.5,
+		-0.5, 0.5
 	};
 
 	unsigned int indices[] = {
 		0, 1, 2,
-		2, 3, 0
+		0, 2, 3
 	};
 
 
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, 4 * 2 * sizeof(float), positions, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, RESOLUTION * 2 * sizeof(float), p.mPoints, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
@@ -132,14 +142,20 @@ int main(void) {
 	unsigned int ibo;
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * (RESOLUTION - 2) * sizeof(unsigned int), p.mIndices, GL_STATIC_DRAW);
 
 	// std::thread th1(test);
 	// th1.join();
+	std::string vertexShader;
+	std::string fragmentShader;
 
-	std::string vertexShader = ReadShaderFile("../res/shaders/basic/vertex.shader");
-	std::string fragmentShader = ReadShaderFile("../res/shaders/basic/fragment.shader");
-
+	// Error Handling for opening shader files
+	try {
+		vertexShader = ReadShaderFile("../res/shaders/basic/vertex.shader");
+		fragmentShader = ReadShaderFile("../res/shaders/basic/fragment.shader");
+	} catch (std::string e) {
+		std::cout << e;
+	}
 
 	unsigned int shader = CreateShader(vertexShader, fragmentShader);
 	glUseProgram(shader);
@@ -160,7 +176,7 @@ int main(void) {
 
 		glUniform4f(location, l, 0.5, 0.0, 1.0);
 
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, 3 * (RESOLUTION - 2), GL_UNSIGNED_INT, nullptr);
 
 		if (l < 0 || l > 1) {
 			increment *= -1;

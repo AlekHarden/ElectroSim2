@@ -1,6 +1,7 @@
 #include <ElectroSim/Electron.hpp>
 
-Electron::Electron(int x, int y, int radius) : Particle(x, y, radius) {
+Electron::Electron(float x, float y, float radius) : Particle(x, y, radius) {
+    // Electrons have a negative charge
     mCharge = -CHARGE;
 }
 

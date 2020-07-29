@@ -5,8 +5,8 @@
 
 class Neutron : public Particle {
 public:
-Neutron(int x, int y, int radius);
-void render();
+    Neutron(float x, float y, float radius);
+    void render();
 };
 
 #endif // ifndef NEUTRON_HPP

@@ -7,19 +7,23 @@
 
 class Particle {
 protected:
-int mX, mY, mRadius;
-float mCharge, mVelX, mVelY, mAccX, mAccY, mMass;
+    float mCharge, mVelX, mVelY, mAccX, mAccY, mMass, mRadius, mX, mY;
 
 public:
-Particle(int x, int y, int radius);
-Particle(const Particle& p);
-~Particle() {
-};
-void applyForces(Particle& p);
-void collide(Particle& p);
-virtual void render() = 0;
-void tick();
-void test();
+    unsigned int mIndices[3 * (RESOLUTION - 2)];
+    float mPoints[2 * RESOLUTION];
+
+    Particle(float x, float y, float radius);
+    Particle(const Particle& p);
+    ~Particle() {
+    };
+    void applyForces(Particle& p);
+    void collide(Particle& p);
+    void calcPoints();
+    void calcIndices();
+    virtual void render() = 0;
+    void tick();
+    void test();
 };
 
 #endif // ifndef PARTICLE_HPP

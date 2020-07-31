@@ -3,7 +3,7 @@ project(ElectroSim2)
 
 # Include libraries
 include_directories(include)
-file(GLOB LIB "lib/*.a")
+file(GLOB LIB "lib/*")
 
 # Set Sources
 file(GLOB SOURCES "src/*.cpp")

@@ -137,9 +137,12 @@ int main(void) {
 	// 	std::cout << p.mIndices[i * 3] << ", " << p.mIndices[i * 3 + 1] << ", " << p.mIndices[i * 3 + 2] << std::endl;
 	// }
 	// std::cout << std::endl;
-	// for(int i = 0; i < CIRCLERESOLUTION; i++) {
-	// 	std::cout << p.mPoints[i * 2] << ", " << p.mPoints[i * 2 + 1] << std::endl;
-	// }
+	// for(int i = 0; i < RESOLUTION; i++){
+    //     std::cout << p.mPoints[i * 2] << ", " << p.mPoints[i * 2 + 1] << std::endl;
+    // }
+
+	std::thread t1(test);
+
 	float positions[] = {
 		-0.5, -0.5,
 		0.5,  -0.5,

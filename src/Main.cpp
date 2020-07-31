@@ -13,6 +13,22 @@
 #include <stdlib.h>
 #include <ElectroSim/Proton.hpp>
 
+void GLAPIENTRY MessageCallback(
+	GLenum source,
+	GLenum type,
+	GLuint id,
+	GLenum severity,
+	GLsizei length,
+	const GLchar* message,
+	const void* userParam ){
+
+		if (severity != GL_DEBUG_SEVERITY_NOTIFICATION){
+			fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ), type, severity, message );
+		}
+
+
+}
+
 void test() {
 	std::cout << "yo from thread" << std::endl;
 }
@@ -87,6 +103,11 @@ int main(void) {
 	/* Initialize the library */
 	if (!glfwInit()) return -1;
 
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	//glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+
+
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
 
@@ -99,24 +120,26 @@ int main(void) {
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
+
+
 	if (glewInit() != GLEW_OK) {
 		std::cout << "Error" << std::endl;
 	}
+
+	glEnable( GL_DEBUG_OUTPUT );
+	glDebugMessageCallback( MessageCallback, 0 );
 
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	/* Loop until the user closes the window */
 
 	Proton p(0, 0, 0.5);
-	// for(int i = 0; i < RESOLUTION - 2; i++){
-    //      std::cout << p.mIndices[i * 3] << ", " << p.mIndices[i * 3 + 1] << ", " << p.mIndices[i * 3 + 2] << std::endl;
-    // }
+	// for(int i = 0; i < CIRCLERESOLUTION - 2; i++) {
+	// 	std::cout << p.mIndices[i * 3] << ", " << p.mIndices[i * 3 + 1] << ", " << p.mIndices[i * 3 + 2] << std::endl;
+	// }
 	// std::cout << std::endl;
-	// for(int i = 0; i < RESOLUTION; i++){
-    //     std::cout << p.mPoints[i * 2] << ", " << p.mPoints[i * 2 + 1] << std::endl;
-    // }
-
-	std::cout << "size of indices " << *(&p.mIndices + 1) - p.mIndices;
-
+	// for(int i = 0; i < CIRCLERESOLUTION; i++) {
+	// 	std::cout << p.mPoints[i * 2] << ", " << p.mPoints[i * 2 + 1] << std::endl;
+	// }
 	float positions[] = {
 		-0.5, -0.5,
 		0.5,  -0.5,
@@ -129,11 +152,15 @@ int main(void) {
 		0, 2, 3
 	};
 
+	unsigned int vao;
+	glGenVertexArrays(1,&vao);
+	glBindVertexArray(vao);
+
 
 	unsigned int buffer;
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, RESOLUTION * 2 * sizeof(float), p.mPoints, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, CIRCLERESOLUTION * 2 * sizeof(float), p.mPoints, GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
@@ -142,7 +169,7 @@ int main(void) {
 	unsigned int ibo;
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * (RESOLUTION - 2) * sizeof(unsigned int), p.mIndices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * (CIRCLERESOLUTION - 2) * sizeof(unsigned int), p.mIndices, GL_STATIC_DRAW);
 
 	// std::thread th1(test);
 	// th1.join();
@@ -168,15 +195,23 @@ int main(void) {
 	double elapsedTime;
 	double timeStart = ns() / 1000000000.0;
 
-	float l;
+	float l = 0.5;
 	float increment = 0.05f;
 
 	while (!glfwWindowShouldClose(window)) {
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		glUseProgram(shader);
 		glUniform4f(location, l, 0.5, 0.0, 1.0);
 
-		glDrawElements(GL_TRIANGLES, 3 * (RESOLUTION - 2), GL_UNSIGNED_INT, nullptr);
+		glBindBuffer(GL_ARRAY_BUFFER, buffer);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+
+
+		glDrawElements(GL_TRIANGLES, 3 * (CIRCLERESOLUTION - 2), GL_UNSIGNED_INT, nullptr);
 
 		if (l < 0 || l > 1) {
 			increment *= -1;

@@ -115,7 +115,7 @@ int main(void) {
     //     std::cout << p.mPoints[i * 2] << ", " << p.mPoints[i * 2 + 1] << std::endl;
     // }
 
-	std::cout << "size of indices " << *(&p.mIndices + 1) - p.mIndices;
+	std::thread t1(test);
 
 	float positions[] = {
 		-0.5, -0.5,

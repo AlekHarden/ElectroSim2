@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ElectroSim/Proton.hpp>
+#include <Electrosim/VertexBuffer.hpp>
+#include <Electrosim/IndexBuffer.hpp>
+
 
 void GLAPIENTRY MessageCallback(
 	GLenum source,
@@ -160,17 +163,15 @@ int main(void) {
 	glGenVertexArrays(1,&vao);
 	glBindVertexArray(vao);
 
-	unsigned int buffer;
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER,buffer);
-	glBufferData(GL_ARRAY_BUFFER, CIRCLERESOLUTION * 2 * sizeof(float), p.mPoints, GL_STATIC_DRAW);
+
+    VertexBuffer vb(p.mPoints,CIRCLERESOLUTION * 2 * sizeof(float));
+
+
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 
-	unsigned int ibo;
-	glGenBuffers(1, &ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,ibo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * (CIRCLERESOLUTION - 2) * sizeof(unsigned int), p.mIndices, GL_STATIC_DRAW);
+
+	IndexBuffer ib(p.mIndices,3 * (CIRCLERESOLUTION - 2));
 
 	// std::thread th1(test);
 	// th1.join();
@@ -212,7 +213,7 @@ int main(void) {
 		glUniform4f(location, l, 0.5, 0.0, 1.0);
 
 		glBindVertexArray(vao);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		ib.Bind();
 
 		glDrawElements(GL_TRIANGLES, 3 * (CIRCLERESOLUTION - 2), GL_UNSIGNED_INT, nullptr);
 

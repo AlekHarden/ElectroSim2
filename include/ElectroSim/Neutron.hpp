@@ -1,7 +1,7 @@
 #ifndef NEUTRON_HPP
 #define NEUTRON_HPP
 
-#include "Particle.hpp"
+#include <ElectroSim/Particle.hpp>
 
 class Neutron : public Particle {
 public:

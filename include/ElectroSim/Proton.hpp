@@ -1,7 +1,7 @@
 #ifndef PROTON_HPP
 #define PROTON_HPP
 
-#include "Particle.hpp"
+#include <ElectroSim/Particle.hpp>
 
 class Proton : public Particle {
 public:

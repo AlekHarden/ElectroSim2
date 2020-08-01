@@ -11,7 +11,7 @@ float* Handler::getPoints(){
 
     for(auto & p : mParticles){
         for(int i = 0; i < 2 * CIRCLERESOLUTION; i++){
-            points[i + CIRCLERESOLUTION * counter] = p.mPoints[i];
+            points[i + CIRCLERESOLUTION * counter * 2 ] = p.mPoints[i];
         }
         counter++;
     }
@@ -23,11 +23,11 @@ unsigned int* Handler::getIndices(){
 	unsigned int* indices;
     indices = (unsigned int*)malloc(sizeof(unsigned int) * 3 * (CIRCLERESOLUTION - 2) * mParticles.size());
 	//which particle
-    int counter = 0;
+    unsigned int counter = 0;
 
     for(auto & p : mParticles){
         for(int i = 0; i < 3 * (CIRCLERESOLUTION - 2); i++){
-            indices[i + CIRCLERESOLUTION * counter] = p.mIndices[i] + counter * (CIRCLERESOLUTION);
+            indices[i + (3* (CIRCLERESOLUTION - 2) * counter)] = counter * (CIRCLERESOLUTION) + p.mIndices[i];
         }
         counter++;
     }
@@ -49,4 +49,17 @@ unsigned int Handler::getNumInd(){
 
 unsigned int Handler::getNumPoints(){
     return mParticles.size() * (CIRCLERESOLUTION);
+}
+
+void Handler::tick(){
+	for( int j = 0; j < mParticles.size(); j++){
+		mParticles[j].tick();
+
+
+
+		for( int i = j+1; i < mParticles.size(); i++){
+			//mParticles[i].applyForces(mParticles[j]);
+		}
+	}
+
 }

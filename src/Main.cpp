@@ -11,10 +11,13 @@
 #include <nano/nano.hpp>
 #include <stdio.h>
 #include <stdlib.h>
-#include <Electrosim/VertexBuffer.hpp>
-#include <Electrosim/IndexBuffer.hpp>
-#include <Electrosim/Shader.hpp>
+#include <ElectroSim/VertexBuffer.hpp>
+#include <ElectroSim/IndexBuffer.hpp>
+#include <ElectroSim/Shader.hpp>
 #include <ElectroSim/Handler.hpp>
+
+
+
 
 
 void GLAPIENTRY MessageCallback(
@@ -72,22 +75,21 @@ int main(void) {
 	glEnable( GL_DEBUG_OUTPUT );
 	glDebugMessageCallback( MessageCallback, 0 );
 
-	std::cout << glGetString(GL_VERSION) << std::endl;
+	std::cout << glGetString(GL_VERSION) << std::endl << std::endl;
 	/* Loop until the user closes the window */
 
-	Proton p(0.5,0.5,0.5);
-	Proton p2(-0.5, -0.5, 0.5);
+ 	Particle p(0.5,0.5,0.4,0.001);
+ 	Particle p2(-0.5, -0.5,0.4,0.001);
+	Particle p3(0.5,-0.5,0.4,-0.001);
+	Particle p4(-0.5, 0.5, 0.4,-0.001);
 	Handler h;
 	h.addParticle(p);
 	h.addParticle(p2);
+	h.addParticle(p3);
+	h.addParticle(p4);
 
-	// for(int i = 0; i < CIRCLERESOLUTION - 2; i++) {
-	// 	std::cout << p.mIndices[i * 3] << ", " << p.mIndices[i * 3 + 1] << ", " << p.mIndices[i * 3 + 2] << std::endl;
-	// }
-	// std::cout << std::endl;
-	// for(int i = 0; i < RESOLUTION; i++){
-    //     std::cout << p.mPoints[i * 2] << ", " << p.mPoints[i * 2 + 1] << std::endl;
-    // }
+
+
 
 	std::thread t1(test);
 	t1.join();
@@ -96,12 +98,17 @@ int main(void) {
 	glGenVertexArrays(1,&vao);
 	glBindVertexArray(vao);
 
-    VertexBuffer vb((const void*)h.getPoints(),2 * CIRCLERESOLUTION * 2 * sizeof(float));
+
+	std::cout << "NumPoints: " << h.getNumPoints() << std::endl;
+	std::cout << "NumInd: " << h.getNumInd() << std::endl;
+	std::cout << "SizePoints: " << sizeof(float) * 2 * h.getNumPoints() << std::endl;
+
+    VertexBuffer vb((void*)h.getPoints(),sizeof(float) * 2 * h.getNumPoints());
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 
-	IndexBuffer ib(h.getIndices(),2* 3 * (CIRCLERESOLUTION - 2));
+	IndexBuffer ib(h.getIndices(),h.getNumInd());
 
 	//Create Shader
 	std::string vertexShader;
@@ -123,9 +130,9 @@ int main(void) {
 	double timeStart = ns() / 1000000000.0;
 
 	glBindVertexArray(0);
-	shader.Unbind();
 	vb.Unbind();
 	ib.Unbind();
+	shader.Unbind();
 
 
 
@@ -134,7 +141,7 @@ int main(void) {
 
 	while (!glfwWindowShouldClose(window)) {
 
-
+		h.tick();
 
 		glClear(GL_COLOR_BUFFER_BIT);
 
@@ -143,8 +150,10 @@ int main(void) {
 
 		glBindVertexArray(vao);
 		ib.Bind();
+		vb.setPoints((void*)h.getPoints(),sizeof(float) * 2 * h.getNumPoints());
 
-		glDrawElements(GL_TRIANGLES,2*  3 * (CIRCLERESOLUTION - 2), GL_UNSIGNED_INT, nullptr);
+
+		glDrawElements(GL_TRIANGLES,h.getNumInd(), GL_UNSIGNED_INT, nullptr);
 
 		if (l < 0 || l > 1) {
 			increment *= -1;
@@ -167,7 +176,7 @@ int main(void) {
 			framerate = frames;
 			timeStart = ns() / 1000000000.0;
 			frames = 0;
-			std::cout << framerate << " " << elapsedTime << std::endl;
+			//std::cout << framerate << " " << elapsedTime << std::endl;
 		}
 
 		frames++;

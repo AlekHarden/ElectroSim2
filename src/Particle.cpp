@@ -4,11 +4,9 @@
 
 
 // Constructor
-Particle::Particle(float x, float y, float radius) {
-	std::cout << "x = "<< x << std::endl;
-	std::cout << "y = "<< y << std::endl;
-	std::cout << "rad = "<< radius << std::endl;
+Particle::Particle(float x, float y, float radius,float charge) {
 
+	mCharge = charge;
 	mHeld = 0;
 	mX = x;
 	mY = y;
@@ -21,17 +19,13 @@ Particle::Particle(float x, float y, float radius) {
 	calcIndices();
 	calcPoints();
 
-	std::cout << "mX = "<< mX << std::endl;
-	std::cout << "mY = "<< mY << std::endl;
-	std::cout << "mRad = "<< mRadius << std::endl;
+
 }
 
 // Copy constructor
 Particle::Particle(const Particle& p) {
-	std::cout << "words"<< std::endl;
-	std::cout << "(copy) mX = "<< p.mX<< std::endl;
-	std::cout << "(copy) mY = "<< p.mY << std::endl;
 
+	mCharge = p.mCharge;
 	mHeld = p.mHeld;
 	mX = p.mX;
 	mY = p.mY;
@@ -67,6 +61,7 @@ void Particle::applyForces(Particle& p) {
 
 	// Apply force to self and target particle
 	mAccX += dx / dist * (force / mMass);
+	std::cout << "accX = " << dx / dist * (force / mMass) << std::endl;
 	mAccY += dy / dist * (force / mMass);
 	p.mAccX += dx / dist * (force / p.mMass);
 	p.mAccY += dy / dist * (force / p.mMass);
@@ -139,13 +134,15 @@ void Particle::calcIndices(){
 }
 
 void Particle::tick() {
+	std::cout << "charge " << mCharge << std::endl;
+
 	mAccX -= mVelX * FRICTION;
 	mAccY -= mVelY * FRICTION;
 	mVelX += mAccX;
 	mVelY += mAccY;
 	mX += mVelX;
 	mY += mVelY;
-	for(int i = 0; i < CIRCLERESOLUTION / 2; i++) {
+	for(int i = 0; i <CIRCLERESOLUTION; i++) {
 		mPoints[i * 2] += mVelX;
 		mPoints[i * 2 + 1] += mVelY;
 	}

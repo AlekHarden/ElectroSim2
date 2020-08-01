@@ -14,7 +14,7 @@ unsigned int mIndices[3 * (CIRCLERESOLUTION - 2)];
 float mPoints[2 * CIRCLERESOLUTION];
 int mHeld;
 
-Particle(float x, float y, float radius);
+Particle(float x, float y, float radius, float charge);
 Particle(const Particle& p);
 ~Particle() {
 };

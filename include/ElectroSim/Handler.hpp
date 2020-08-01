@@ -3,9 +3,7 @@
 
 #include <vector>
 #include <algorithm>
-#include <ElectroSim/Proton.hpp>
-#include <ElectroSim/Neutron.hpp>
-#include <ElectroSim/Electron.hpp>
+#include <ElectroSim/Particle.hpp>
 
 class Handler{
 private:
@@ -19,6 +17,7 @@ public:
     void removeParticle();
     unsigned int getNumInd();
     unsigned int getNumPoints();
+	void tick();
 };
 
 

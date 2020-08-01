@@ -2,7 +2,7 @@
 #include <string>
 #include <iostream>
 #include <GL/glew.h>
-#include <Electrosim/Shader.hpp>
+#include <ElectroSim/Shader.hpp>
 
 
 Shader::Shader(const std::string& vertexShader,const std::string& fragmentShader) : mRendererID(0){
@@ -87,6 +87,7 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 
 
 std::string ReadShaderFile(std::string filepath) {
+
 	char buffer[100];
 	char cbullshit;
 	std::string shaderSource;
@@ -101,5 +102,7 @@ std::string ReadShaderFile(std::string filepath) {
 		shaderSource.push_back(cbullshit);
 		shaderSource.append(buffer);
 	}
+	//std::cout << "SOURCE: \n" << shaderSource << std::endl;
+
 	return shaderSource;
 }

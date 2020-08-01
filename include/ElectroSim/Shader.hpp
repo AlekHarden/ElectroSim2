@@ -1,3 +1,5 @@
+#ifndef SHADER_HPP
+#define SHADER_HPP
 #include <string>
 
 std::string ReadShaderFile(std::string filepath);
@@ -18,3 +20,4 @@ public:
 
 	void SetUniform4f(const std::string name, float v0, float v1, float v2, float v3);
 };
+#endif

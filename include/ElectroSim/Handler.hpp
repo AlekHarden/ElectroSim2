@@ -17,6 +17,8 @@ public:
     unsigned int* getIndices();
     void addParticle(Particle p);
     void removeParticle();
+    unsigned int getNumInd();
+    unsigned int getNumPoints();
 };
 
 

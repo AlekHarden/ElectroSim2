@@ -1,6 +1,7 @@
-#include <Electrosim/VertexBuffer.hpp>
 #define GLEW_STATIC
+#include <Electrosim/VertexBuffer.hpp>
 #include <GL/glew.h>
+#include <stdlib.h>
 
 VertexBuffer::VertexBuffer(const void* data, unsigned int size){
 	glGenBuffers(1, &mRendererID);

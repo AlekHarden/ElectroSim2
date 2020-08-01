@@ -13,8 +13,8 @@ private:
 
 public:
     Handler();
-    float* getPoints(float* points);
-    unsigned int* getIndices(unsigned int* indices);
+    float* getPoints();
+    unsigned int* getIndices();
     void addParticle(Particle p);
     void removeParticle();
 };

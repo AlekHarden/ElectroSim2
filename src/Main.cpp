@@ -11,9 +11,10 @@
 #include <nano/nano.hpp>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ElectroSim/Proton.hpp>
 #include <Electrosim/VertexBuffer.hpp>
 #include <Electrosim/IndexBuffer.hpp>
+#include <Electrosim/Shader.hpp>
+#include <ElectroSim/Handler.hpp>
 
 
 void GLAPIENTRY MessageCallback(
@@ -36,68 +37,7 @@ void test() {
 	std::cout << "yo from thread" << std::endl;
 }
 
-std::string ReadShaderFile(std::string filepath) {
-	char buffer[100];
-	char cbullshit;
-	std::string shaderSource;
-	FILE *file = fopen(filepath.c_str(), "r");
 
-	// Error checking
-	if (file == NULL) throw("ERROR: File \"" + filepath + "\" does not exist\n");
-
-	//fgetc eats first character so you have to set c bullshit and append it later
-	while ((cbullshit = fgetc(file)) != EOF) {
-		fgets(buffer, 100, file);
-		shaderSource.push_back(cbullshit);
-		shaderSource.append(buffer);
-	}
-	return shaderSource;
-}
-
-static unsigned int CompileShader(unsigned int type, const std::string& source) {
-	unsigned int id = glCreateShader(type);
-	const char *src = source.c_str();
-
-	glShaderSource(id, 1, &src, nullptr);
-	glCompileShader(id);
-
-	int result;
-
-
-
-
-	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
-
-	if (result == GL_FALSE) {
-		int length;
-		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
-		char *message = (char *)alloca(length * sizeof(char));
-		glGetShaderInfoLog(id, length, &length, message);
-		std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader!" << std::endl;
-		std::cout << message << std::endl;
-		glDeleteShader(id);
-		return 0;
-	}
-
-	return id;
-}
-
-static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
-	unsigned int program = glCreateProgram();
-	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
-
-	glAttachShader(program, vs);
-	glAttachShader(program, fs);
-
-	glLinkProgram(program);
-	glValidateProgram(program);
-
-	glDeleteShader(vs);
-	glDeleteShader(fs);
-
-	return program;
-};
 
 
 int main(void) {
@@ -135,7 +75,12 @@ int main(void) {
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	/* Loop until the user closes the window */
 
-	Proton p(0, 0, 0.5);
+	Proton p(0.5,0.5,0.5);
+	Proton p2(-0.5, -0.5, 0.5);
+	Handler h;
+	h.addParticle(p);
+	h.addParticle(p2);
+
 	// for(int i = 0; i < CIRCLERESOLUTION - 2; i++) {
 	// 	std::cout << p.mIndices[i * 3] << ", " << p.mIndices[i * 3 + 1] << ", " << p.mIndices[i * 3 + 2] << std::endl;
 	// }
@@ -147,37 +92,20 @@ int main(void) {
 	std::thread t1(test);
 	t1.join();
 
-	float positions[] = {
-		-0.5, -0.5,
-		0.5,  -0.5,
-		0.5,  0.5,
-		-0.5, 0.5
-	};
-
-	unsigned int indices[] = {
-		0, 1, 2,
-		0, 2, 3
-	};
-
 	unsigned int vao;
 	glGenVertexArrays(1,&vao);
 	glBindVertexArray(vao);
 
-
-    VertexBuffer vb(p.mPoints,CIRCLERESOLUTION * 2 * sizeof(float));
-
+    VertexBuffer vb((const void*)h.getPoints(),2 * CIRCLERESOLUTION * 2 * sizeof(float));
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 
+	IndexBuffer ib(h.getIndices(),2* 3 * (CIRCLERESOLUTION - 2));
 
-	IndexBuffer ib(p.mIndices,3 * (CIRCLERESOLUTION - 2));
-
-	// std::thread th1(test);
-	// th1.join();
+	//Create Shader
 	std::string vertexShader;
 	std::string fragmentShader;
-
 	// Error Handling for opening shader files
 	try {
 		vertexShader = ReadShaderFile("../res/shaders/basic/vertex.shader");
@@ -185,12 +113,9 @@ int main(void) {
 	} catch (std::string e) {
 		std::cout << e;
 	}
-
-	unsigned int shader = CreateShader(vertexShader, fragmentShader);
-	glUseProgram(shader);
-
-	int location = glGetUniformLocation(shader, "u_Color");
-	glUniform4f(location, 1.0, 0.5, 0.0, 1.0);
+	Shader shader(vertexShader,fragmentShader);
+	shader.Bind();
+	shader.SetUniform4f("u_Color", 1.0, 0.5, 0.0, 1.0);
 
 	unsigned int frames = 0;
 	unsigned int framerate;
@@ -198,24 +123,28 @@ int main(void) {
 	double timeStart = ns() / 1000000000.0;
 
 	glBindVertexArray(0);
-	glUseProgram(0);
-	glBindBuffer(GL_ARRAY_BUFFER,0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+	shader.Unbind();
+	vb.Unbind();
+	ib.Unbind();
+
 
 
 	float l = 0.5;
 	float increment = 0.05f;
 
 	while (!glfwWindowShouldClose(window)) {
+
+
+
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shader);
-		glUniform4f(location, l, 0.5, 0.0, 1.0);
+		shader.Bind();
+		shader.SetUniform4f("u_Color", l, 0.5, 0.0, 1.0);
 
 		glBindVertexArray(vao);
 		ib.Bind();
 
-		glDrawElements(GL_TRIANGLES, 3 * (CIRCLERESOLUTION - 2), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES,2*  3 * (CIRCLERESOLUTION - 2), GL_UNSIGNED_INT, nullptr);
 
 		if (l < 0 || l > 1) {
 			increment *= -1;
@@ -243,8 +172,6 @@ int main(void) {
 
 		frames++;
 	}
-	glDeleteProgram(shader);
-
 	glfwTerminate();
 	return 0;
 }

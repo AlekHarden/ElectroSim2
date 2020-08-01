@@ -1,5 +1,5 @@
-#include <Electrosim/IndexBuffer.hpp>
 #define GLEW_STATIC
+#include <Electrosim/IndexBuffer.hpp>
 #include <GL/glew.h>
 
 IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count) : mCount(count) {

@@ -5,7 +5,7 @@
 
 class Proton : public Particle {
 public:
-    Proton(int x, int y, float radius);
+    Proton(float x, float y, float radius);
     void render();
 };
 

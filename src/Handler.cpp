@@ -4,8 +4,8 @@ Handler::Handler(){
 
 }
 
-float* Handler::getPoints(float* points){
-    free(points);
+float* Handler::getPoints(){
+	float* points;
     points = (float*)malloc(sizeof(float) * 2 * CIRCLERESOLUTION * mParticles.size());
     int counter = 0;
 
@@ -19,9 +19,10 @@ float* Handler::getPoints(float* points){
     return points;
 }
 
-unsigned int* Handler::getIndices(unsigned int* indices){
-    free(indices);
+unsigned int* Handler::getIndices(){
+	unsigned int* indices;
     indices = (unsigned int*)malloc(sizeof(unsigned int) * 3 * (CIRCLERESOLUTION - 2) * mParticles.size());
+	//which particle
     int counter = 0;
 
     for(auto & p : mParticles){

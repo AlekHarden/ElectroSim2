@@ -1,10 +1,14 @@
 #include <ElectroSim/Particle.hpp>
-
+#include <iostream>
 
 
 
 // Constructor
 Particle::Particle(float x, float y, float radius) {
+	std::cout << "x = "<< x << std::endl;
+	std::cout << "y = "<< y << std::endl;
+	std::cout << "rad = "<< radius << std::endl;
+
 	mHeld = 0;
 	mX = x;
 	mY = y;
@@ -16,10 +20,18 @@ Particle::Particle(float x, float y, float radius) {
 	mMass = PI * radius * radius * DENSITY;
 	calcIndices();
 	calcPoints();
+
+	std::cout << "mX = "<< mX << std::endl;
+	std::cout << "mY = "<< mY << std::endl;
+	std::cout << "mRad = "<< mRadius << std::endl;
 }
 
 // Copy constructor
 Particle::Particle(const Particle& p) {
+	std::cout << "words"<< std::endl;
+	std::cout << "(copy) mX = "<< p.mX<< std::endl;
+	std::cout << "(copy) mY = "<< p.mY << std::endl;
+
 	mHeld = p.mHeld;
 	mX = p.mX;
 	mY = p.mY;
@@ -110,6 +122,7 @@ void Particle::calcPoints(){
 	if (mRadius == 0) return;
 	int index = 0;
 	float step = 2*PI / CIRCLERESOLUTION;
+
 	for(float i = 0; i < 2*PI; i += step) {
 		mPoints[index] = mRadius * cos(i) + mX;
 		mPoints[index + 1] = mRadius * sin(i) + mY;

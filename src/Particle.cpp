@@ -5,6 +5,7 @@
 
 // Constructor
 Particle::Particle(float x, float y, float radius) {
+	mHeld = 0;
 	mX = x;
 	mY = y;
 	mVelX = 0;
@@ -19,6 +20,7 @@ Particle::Particle(float x, float y, float radius) {
 
 // Copy constructor
 Particle::Particle(const Particle& p) {
+	mHeld = p.mHeld;
 	mX = p.mX;
 	mY = p.mY;
 	mVelX = p.mVelX;

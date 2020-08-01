@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <cmath>
-#include "Constants.hpp"
+#include <ElectroSim/Constants.hpp>
 
 class Particle {
 protected:
@@ -12,6 +12,7 @@ float mCharge, mVelX, mVelY, mAccX, mAccY, mMass, mRadius, mX, mY;
 public:
 unsigned int mIndices[3 * (CIRCLERESOLUTION - 2)];
 float mPoints[2 * CIRCLERESOLUTION];
+int mHeld;
 
 Particle(float x, float y, float radius);
 Particle(const Particle& p);
@@ -21,7 +22,7 @@ void applyForces(Particle& p);
 void collide(Particle& p);
 void calcPoints();
 void calcIndices();
-virtual void render() = 0;
+//virtual void render() = 0;
 void tick();
 void test();
 };

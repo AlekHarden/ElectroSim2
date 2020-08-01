@@ -26,7 +26,7 @@ unsigned int* Handler::getIndices(unsigned int* indices){
 
     for(auto & p : mParticles){
         for(int i = 0; i < 3 * (CIRCLERESOLUTION - 2); i++){
-            indices[i + CIRCLERESOLUTION * counter] = p.mIndices[i] + counter * (CIRCLERESOLUTION - 1);
+            indices[i + CIRCLERESOLUTION * counter] = p.mIndices[i] + counter * (CIRCLERESOLUTION);
         }
         counter++;
     }
@@ -40,4 +40,12 @@ void Handler::addParticle(Particle p){
 
 void Handler::removeParticle(){
     std::remove_if(mParticles.begin(), mParticles.end(), [&](Particle p){return p.mHeld;});
+}
+
+unsigned int Handler::getNumInd(){
+    return mParticles.size() * (CIRCLERESOLUTION - 2) * 3;
+}
+
+unsigned int Handler::getNumPoints(){
+    return mParticles.size() * (CIRCLERESOLUTION);
 }

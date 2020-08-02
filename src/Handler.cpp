@@ -58,7 +58,7 @@ void Handler::tick(){
 
 
 		for( int i = j+1; i < mParticles.size(); i++){
-			//mParticles[i].applyForces(mParticles[j]);
+			mParticles[i].applyForces(mParticles[j]);
 		}
 	}
 

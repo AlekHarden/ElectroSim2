@@ -134,7 +134,7 @@ void Particle::calcIndices(){
 }
 
 void Particle::tick() {
-	std::cout << "charge " << mCharge << std::endl;
+	//std::cout << "charge " << mCharge << std::endl;
 
 	mAccX -= mVelX * FRICTION;
 	mAccY -= mVelY * FRICTION;

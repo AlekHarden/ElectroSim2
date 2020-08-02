@@ -6,7 +6,7 @@
 #include <ElectroSim/Constants.hpp>
 
 class Particle {
-protected:
+private:
 float mCharge, mVelX, mVelY, mAccX, mAccY, mMass, mRadius, mX, mY;
 
 public:

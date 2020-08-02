@@ -17,6 +17,21 @@
 #include <ElectroSim/Handler.hpp>
 
 
+float* pixelToScreen(float *points,int count){
+	for(int i = 0; i < count ; i++){
+		std::cout << "Points[" << i << "] = " << points[i*2] << ", " <<  points[i*2+1] << std::endl;
+
+
+		points[i*2] /= (float)WIDTH/2;
+		points[i*2 + 1] /= (float)HEIGHT/2;
+
+		std::cout << "Points[" << i << "] (scaled) = " << points[i*2] << ", " <<  points[i*2+1] << std::endl;
+
+	}
+	return points;
+}
+
+
 
 
 
@@ -55,7 +70,7 @@ int main(void) {
 
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Hello World", NULL, NULL);
 
 	if (!window) {
 		glfwTerminate();
@@ -78,15 +93,13 @@ int main(void) {
 	std::cout << glGetString(GL_VERSION) << std::endl << std::endl;
 	/* Loop until the user closes the window */
 
- 	Particle p(0.5,0.5,0.4,0.001);
- 	Particle p2(-0.5, -0.5,0.4,0.001);
-	Particle p3(0.5,-0.5,0.4,-0.001);
-	Particle p4(-0.5, 0.5, 0.4,-0.001);
+	Particle p1(-50,0, 10,-0.00001);
+ 	Particle p2(50, 0, 10, 0.00001);
+
 	Handler h;
-	h.addParticle(p);
+	h.addParticle(p1);
 	h.addParticle(p2);
-	h.addParticle(p3);
-	h.addParticle(p4);
+
 
 
 
@@ -102,8 +115,7 @@ int main(void) {
 	std::cout << "NumPoints: " << h.getNumPoints() << std::endl;
 	std::cout << "NumInd: " << h.getNumInd() << std::endl;
 	std::cout << "SizePoints: " << sizeof(float) * 2 * h.getNumPoints() << std::endl;
-
-    VertexBuffer vb((void*)h.getPoints(),sizeof(float) * 2 * h.getNumPoints());
+    VertexBuffer vb((void*)pixelToScreen(h.getPoints(),h.getNumPoints()),sizeof(float) * 2 * h.getNumPoints());
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
@@ -150,7 +162,7 @@ int main(void) {
 
 		glBindVertexArray(vao);
 		ib.Bind();
-		vb.setPoints((void*)h.getPoints(),sizeof(float) * 2 * h.getNumPoints());
+		vb.setPoints((void*)pixelToScreen(h.getPoints(),h.getNumPoints()),sizeof(float) * 2 * h.getNumPoints());
 
 
 		glDrawElements(GL_TRIANGLES,h.getNumInd(), GL_UNSIGNED_INT, nullptr);

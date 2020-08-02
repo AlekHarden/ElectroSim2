@@ -105,28 +105,20 @@ void Particle::collide(Particle& p) {
 	float nx = -dx / dist;
 	float ny = -dy / dist;
 
-	// Tangent Vector
-	float tx = -ny;
-	float ty = nx;
-
-	// Tangent Dot Velocity
-	float dpTan1 = mVelX * tx + mVelY * ty;
-	float dpTan2 = p.mVelX * tx + p.mVelY * ty;
-
-	// Normal Dot Velocity
-	float dpNorm1 = mVelX * nx + mVelY * ny;
-	float dpNorm2 = p.mVelX * nx + p.mVelY * ny;
-
-	// Calculate momentums
-	float m1 = (dpNorm1 * (mMass - p.mMass) + 2.0 * p.mMass * dpNorm2) / (mMass + p.mMass);
-	float m2 = (dpNorm2 * (p.mMass - mMass) + 2.0 * mMass * dpNorm1) / (mMass + p.mMass);
+	float Ix = (mMass * p.mMass) / (mMass + p.mMass) * (1 + ELASTICITY) * (p.mVelX - mVelX);
+	float Iy = (mMass * p.mMass) / (mMass + p.mMass) * (1 + ELASTICITY) * (p.mVelY - mVelY);
 
 	// Apply the collision
 	//((1/((5*relVel)+6.67)) + 0.85 )
-	mVelX =   ELASTICITY * ( tx * dpTan1 + nx * m1 );
-	mVelY =   ELASTICITY * ( ty * dpTan1 + ny * m1 );
-	p.mVelX = ELASTICITY * ( tx * dpTan2 + nx * m2 );
-	p.mVelY = ELASTICITY * ( ty * dpTan2 + ny * m2 );
+	// mVelX = ( tx * dpTan1 + nx * m1 );
+	// mVelY = ( ty * dpTan1 + ny * m1 );
+	// p.mVelX = ( tx * dpTan2 + nx * m2 );
+	// p.mVelY = ( ty * dpTan2 + ny * m2 );
+
+	mVelX -= (Ix / mMass) * nx;
+	mVelY -= (Iy / mMass) * ny;
+	p.mVelX += (Ix / p.mMass) * nx;
+	p.mVelY += (Iy / p.mMass) * ny;
 }
 
 void Particle::tick() {

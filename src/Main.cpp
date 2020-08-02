@@ -19,13 +19,13 @@
 
 float* pixelToScreen(float *points,int count){
 	for(int i = 0; i < count ; i++){
-		std::cout << "Points[" << i << "] = " << points[i*2] << ", " <<  points[i*2+1] << std::endl;
+		//std::cout << "Points[" << i << "] = " << points[i*2] << ", " <<  points[i*2+1] << std::endl;
 
 
 		points[i*2] /= (float)WIDTH/2;
 		points[i*2 + 1] /= (float)HEIGHT/2;
 
-		std::cout << "Points[" << i << "] (scaled) = " << points[i*2] << ", " <<  points[i*2+1] << std::endl;
+		//std::cout << "Points[" << i << "] (scaled) = " << points[i*2] << ", " <<  points[i*2+1] << std::endl;
 
 	}
 	return points;
@@ -93,8 +93,8 @@ int main(void) {
 	std::cout << glGetString(GL_VERSION) << std::endl << std::endl;
 	/* Loop until the user closes the window */
 
-	Particle p1(-50,0, 10,-0.00001);
- 	Particle p2(50, 0, 10, 0.00001);
+	Particle p1(-50,0, 20,-0.0001);
+ 	Particle p2(50, 0, 10, 0.0001);
 
 	Handler h;
 	h.addParticle(p1);
@@ -158,7 +158,7 @@ int main(void) {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		shader.Bind();
-		shader.SetUniform4f("u_Color", l, 0.5, 0.0, 1.0);
+		shader.SetUniform4f("u_Color", l, 0.5, 1, 1.0);
 
 		glBindVertexArray(vao);
 		ib.Bind();

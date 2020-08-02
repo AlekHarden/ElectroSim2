@@ -61,10 +61,9 @@ void Particle::applyForces(Particle& p) {
 
 	// Apply force to self and target particle
 	mAccX += dx / dist * (force / mMass);
-	std::cout << "accX = " << dx / dist * (force / mMass) << std::endl;
 	mAccY += dy / dist * (force / mMass);
-	p.mAccX += dx / dist * (force / p.mMass);
-	p.mAccY += dy / dist * (force / p.mMass);
+	p.mAccX -= dx / dist * (force / p.mMass);
+	p.mAccY -= dy / dist * (force / p.mMass);
 }
 
 // Calculate and apply collisions between self and another Particle
@@ -88,6 +87,10 @@ void Particle::collide(Particle& p) {
 	p.mY += yOff;
 
 	// Do dynamic collisions
+
+	dx = mX - p.mX;
+	dy = mY - p.mY;
+	dist = sqrt(dx * dx + dy * dy);
 
 	// Yes math... indeed...
 	float nx = -dx / dist;

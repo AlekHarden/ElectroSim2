@@ -8,6 +8,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <cstdlib>
 #include <nano/nano.hpp>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +16,10 @@
 #include <ElectroSim/IndexBuffer.hpp>
 #include <ElectroSim/Shader.hpp>
 #include <ElectroSim/Handler.hpp>
+
+float randNum(){
+	return (((float)rand() - (float)RAND_MAX/2) / (float)RAND_MAX);
+}
 
 
 float* pixelToScreen(float *points,int count){
@@ -59,6 +64,7 @@ void test() {
 
 
 int main(void) {
+	srand(ns());
 	GLFWwindow *window;
 
 	/* Initialize the library */
@@ -70,7 +76,7 @@ int main(void) {
 
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(WIDTH, HEIGHT, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "ElectroSim", NULL, NULL);
 
 	if (!window) {
 		glfwTerminate();
@@ -79,7 +85,7 @@ int main(void) {
 
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
+	glfwSwapInterval(0);
 
 
 
@@ -93,12 +99,16 @@ int main(void) {
 	std::cout << glGetString(GL_VERSION) << std::endl << std::endl;
 	/* Loop until the user closes the window */
 
-	Particle p1(-50,0, 20,-0.0001);
- 	Particle p2(50, 0, 10, 0.0001);
+
 
 	Handler h;
-	h.addParticle(p1);
-	h.addParticle(p2);
+
+	for(int i = 0; i < 2;i++ ){
+		h.addParticle(*new Particle(randNum() * WIDTH,randNum() * HEIGHT, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.00001));
+	}
+
+
+
 
 
 
@@ -152,9 +162,7 @@ int main(void) {
 	float increment = 0.05f;
 
 	while (!glfwWindowShouldClose(window)) {
-
 		h.tick();
-
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		shader.Bind();
@@ -166,6 +174,8 @@ int main(void) {
 
 
 		glDrawElements(GL_TRIANGLES,h.getNumInd(), GL_UNSIGNED_INT, nullptr);
+
+
 
 		if (l < 0 || l > 1) {
 			increment *= -1;
@@ -188,7 +198,7 @@ int main(void) {
 			framerate = frames;
 			timeStart = ns() / 1000000000.0;
 			frames = 0;
-			//std::cout << framerate << " " << elapsedTime << std::endl;
+			std::cout << framerate << " " << elapsedTime << std::endl;
 		}
 
 		frames++;

@@ -3,6 +3,7 @@
 
 
 
+
 // Constructor
 Particle::Particle(float x, float y, float radius,float charge) {
 
@@ -16,11 +17,9 @@ Particle::Particle(float x, float y, float radius,float charge) {
 	mAccY = 0;
 	mRadius = radius;
 	mMass = PI * radius * radius * DENSITY;
-	calcIndices();
-	calcPoints();
-
-
 }
+
+
 
 // Copy constructor
 Particle::Particle(const Particle& p) {
@@ -47,15 +46,16 @@ Particle::Particle(const Particle& p) {
 void Particle::applyForces(Particle& p) {
 	// If the particle doesnt have a charge there is no force
 
-	if (!mCharge) return;
+	if (mCharge == 0) return;
 
 	// Figure out the distance between the particles
 	float dx = mX - p.mX;
 	float dy = mY - p.mY;
 	double dist = sqrt(dx * dx + dy * dy);
 
+
 	// Particles are inside of eachother
-	if (dist <= (mRadius + p.mRadius)) return;
+	if (dist < (mRadius + p.mRadius)) return;
 
 	double force = K * mCharge * p.mCharge / (dist * dist);
 
@@ -73,6 +73,7 @@ void Particle::collide(Particle& p) {
 	float dy = mY - p.mY;
 	double dist = sqrt(dx * dx + dy * dy);
 
+
 	if (dist > mRadius + p.mRadius) return;
 
 	// Calculate how much the particles have to move
@@ -86,7 +87,10 @@ void Particle::collide(Particle& p) {
 	p.mX += xOff;
 	p.mY += yOff;
 
-	// Do dynamic collisions
+
+
+
+	//Do dynamic collisions
 
 	dx = mX - p.mX;
 	dy = mY - p.mY;
@@ -115,27 +119,6 @@ void Particle::collide(Particle& p) {
 	p.mVelY = ELASTICITY * (ty * dpTan2 + ny * m2);
 }
 
-//
-void Particle::calcPoints(){
-	if (mRadius == 0) return;
-	int index = 0;
-	float step = 2*PI / CIRCLERESOLUTION;
-
-	for(float i = 0; i < 2*PI; i += step) {
-		mPoints[index] = mRadius * cos(i) + mX;
-		mPoints[index + 1] = mRadius * sin(i) + mY;
-		index += 2;
-	}
-}
-
-void Particle::calcIndices(){
-	for(int i = 0; i < CIRCLERESOLUTION - 2; i++) {
-		mIndices[i * 3] = 0;
-		mIndices[i * 3 + 1] = i + 1;
-		mIndices[i * 3 + 2] = i + 2;
-	}
-}
-
 void Particle::tick() {
 	//std::cout << "charge " << mCharge << std::endl;
 
@@ -145,10 +128,6 @@ void Particle::tick() {
 	mVelY += mAccY;
 	mX += mVelX;
 	mY += mVelY;
-	for(int i = 0; i <CIRCLERESOLUTION; i++) {
-		mPoints[i * 2] += mVelX;
-		mPoints[i * 2 + 1] += mVelY;
-	}
 	mAccX = 0;
 	mAccY = 0;
 }

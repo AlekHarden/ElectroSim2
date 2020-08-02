@@ -1,7 +1,19 @@
 #include <ElectroSim/Handler.hpp>
 
 Handler::Handler(){
+	int index = 0;
+	float step = 2*PI / CIRCLERESOLUTION;
 
+	for(float i = 0; i < 2*PI; i += step) {
+		mUnitCircle[index] = cos(i);
+		mUnitCircle[index + 1] = sin(i);
+		index += 2;
+	}
+	for(int i = 0; i < CIRCLERESOLUTION - 2; i++) {
+		mIndices[i * 3] = 0;
+		mIndices[i * 3 + 1] = i + 1;
+		mIndices[i * 3 + 2] = i + 2;
+	}
 }
 
 float* Handler::getPoints(){
@@ -10,8 +22,9 @@ float* Handler::getPoints(){
     int counter = 0;
 
     for(auto & p : mParticles){
-        for(int i = 0; i < 2 * CIRCLERESOLUTION; i++){
-            points[i + CIRCLERESOLUTION * counter * 2 ] = p.mPoints[i];
+        for(int i = 0; i < 2* CIRCLERESOLUTION; i+=2){
+            points[i + CIRCLERESOLUTION * counter * 2 ] = mUnitCircle[i] * p.mRadius + p.mX ;
+			points[i + CIRCLERESOLUTION * counter * 2 + 1] = mUnitCircle[i + 1] * p.mRadius + p.mY;
         }
         counter++;
     }
@@ -27,7 +40,7 @@ unsigned int* Handler::getIndices(){
 
     for(auto & p : mParticles){
         for(int i = 0; i < 3 * (CIRCLERESOLUTION - 2); i++){
-            indices[i + (3* (CIRCLERESOLUTION - 2) * counter)] = counter * (CIRCLERESOLUTION) + p.mIndices[i];
+            indices[i + (3* (CIRCLERESOLUTION - 2) * counter)] = counter * (CIRCLERESOLUTION) + mIndices[i];
         }
         counter++;
     }
@@ -53,7 +66,6 @@ unsigned int Handler::getNumPoints(){
 
 void Handler::tick(){
 	for( int j = 0; j < mParticles.size(); j++){
-		mParticles[j].tick();
 
 
 
@@ -61,6 +73,12 @@ void Handler::tick(){
 			mParticles[i].applyForces(mParticles[j]);
 			mParticles[i].collide(mParticles[j]);
 		}
+
+
 	}
+	for( int j = 0; j < mParticles.size(); j++){
+		mParticles[j].tick();
+	}
+
 
 }

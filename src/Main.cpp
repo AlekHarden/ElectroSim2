@@ -201,7 +201,7 @@ int main(void) {
 			framerate = frames;
 			timeStart = ns() / 1000000000.0;
 			frames = 0;
-			std::cout << framerate << " " << elapsedTime << std::endl;
+			std::cout << framerate << " " << std::endl;
 		}
 
 		frames++;

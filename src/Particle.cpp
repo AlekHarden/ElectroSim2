@@ -55,7 +55,7 @@ void Particle::applyForces(Particle& p) {
 
 
 	// Particles are inside of eachother
-	if (dist < (mRadius + p.mRadius)) return;
+	//if (dist < (mRadius + p.mRadius)) return;
 
 	double force = K * mCharge * p.mCharge / (dist * dist);
 
@@ -94,17 +94,26 @@ void Particle::collide(Particle& p) {
 
 	dx = mX - p.mX;
 	dy = mY - p.mY;
+	float vRelx = mVelX - p.mVelX;
+	float vRely = mVelY - p.mVelY;
+	float relVel = sqrt(vRelx * vRelx + vRely * vRely);
 	dist = sqrt(dx * dx + dy * dy);
 
 	// Yes math... indeed...
+
+	// Normal Vector
 	float nx = -dx / dist;
 	float ny = -dy / dist;
 
+	// Tangent Vector
 	float tx = -ny;
 	float ty = nx;
 
+	// Tangent Dot Velocity
 	float dpTan1 = mVelX * tx + mVelY * ty;
 	float dpTan2 = p.mVelX * tx + p.mVelY * ty;
+
+	// Normal Dot Velocity
 	float dpNorm1 = mVelX * nx + mVelY * ny;
 	float dpNorm2 = p.mVelX * nx + p.mVelY * ny;
 
@@ -113,10 +122,11 @@ void Particle::collide(Particle& p) {
 	float m2 = (dpNorm2 * (p.mMass - mMass) + 2.0 * mMass * dpNorm1) / (mMass + p.mMass);
 
 	// Apply the collision
-	mVelX = ELASTICITY * (tx * dpTan1 + nx * m1);
-	mVelY = ELASTICITY * (ty * dpTan1 + ny * m1);
-	p.mVelX = ELASTICITY * (tx * dpTan2 + nx * m2);
-	p.mVelY = ELASTICITY * (ty * dpTan2 + ny * m2);
+	//((1/((5*relVel)+6.67)) + 0.85 )
+	mVelX =   ELASTICITY * ( tx * dpTan1 + nx * m1 );
+	mVelY =   ELASTICITY * ( ty * dpTan1 + ny * m1 );
+	p.mVelX = ELASTICITY * ( tx * dpTan2 + nx * m2 );
+	p.mVelY = ELASTICITY * ( ty * dpTan2 + ny * m2 );
 }
 
 void Particle::tick() {

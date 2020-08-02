@@ -24,11 +24,9 @@ float randNum(){
 
 float* pixelToScreen(float *points,int count){
 	for(int i = 0; i < count ; i++){
-		//std::cout << "Points[" << i << "] = " << points[i*2] << ", " <<  points[i*2+1] << std::endl;
-
-
-		points[i*2] /= (float)WIDTH/2;
-		points[i*2 + 1] /= (float)HEIGHT/2;
+		//std::cout << "Points[" << i << "] = " << points[i*2] << ", " <<  points[i*2+1] << std::endl
+		points[i*6] /= (float)WIDTH/2;
+		points[i*6 + 1] /= (float)HEIGHT/2;
 
 		//std::cout << "Points[" << i << "] (scaled) = " << points[i*2] << ", " <<  points[i*2+1] << std::endl;
 
@@ -76,7 +74,8 @@ int main(void) {
 
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(WIDTH, HEIGHT, "ElectroSim", NULL, NULL);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "ElectroSim",NULL, NULL);
+	//glfwGetPrimaryMonitor()
 
 	if (!window) {
 		glfwTerminate();
@@ -103,7 +102,7 @@ int main(void) {
 
 	Handler h;
 
-	for(int i = 0; i < 2;i++ ){
+	for(int i = 0; i < 80;i++ ){
 		h.addParticle(*new Particle(randNum() * WIDTH,randNum() * HEIGHT, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.00001));
 	}
 
@@ -125,12 +124,16 @@ int main(void) {
 	std::cout << "NumPoints: " << h.getNumPoints() << std::endl;
 	std::cout << "NumInd: " << h.getNumInd() << std::endl;
 	std::cout << "SizePoints: " << sizeof(float) * 2 * h.getNumPoints() << std::endl;
-    VertexBuffer vb((void*)pixelToScreen(h.getPoints(),h.getNumPoints()),sizeof(float) * 2 * h.getNumPoints());
+    VertexBuffer vb((void*)pixelToScreen(h.getPoints(),h.getNumPoints()),sizeof(float) * 6 * h.getNumPoints());
 
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)8);
 
-	IndexBuffer ib(h.getIndices(),h.getNumInd());
+
+	unsigned int* indices = h.getIndices();
+	IndexBuffer ib(indices,h.getNumInd());
 
 	//Create Shader
 	std::string vertexShader;
@@ -144,7 +147,7 @@ int main(void) {
 	}
 	Shader shader(vertexShader,fragmentShader);
 	shader.Bind();
-	shader.SetUniform4f("u_Color", 1.0, 0.5, 0.0, 1.0);
+	//shader.SetUniform4f("u_Color", 1.0, 0.5, 0.0, 1.0);
 
 	unsigned int frames = 0;
 	unsigned int framerate;
@@ -166,12 +169,12 @@ int main(void) {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		shader.Bind();
-		shader.SetUniform4f("u_Color", l, 0.5, 1, 1.0);
+		//shader.SetUniform4f("u_Color", l, 0.5, 1, 1.0);
 
 		glBindVertexArray(vao);
 		ib.Bind();
-		vb.setPoints((void*)pixelToScreen(h.getPoints(),h.getNumPoints()),sizeof(float) * 2 * h.getNumPoints());
-
+		float* points = h.getPoints();
+		vb.setPoints((void*)pixelToScreen(points,h.getNumPoints()),sizeof(float) * 6 * h.getNumPoints());
 
 		glDrawElements(GL_TRIANGLES,h.getNumInd(), GL_UNSIGNED_INT, nullptr);
 
@@ -202,7 +205,10 @@ int main(void) {
 		}
 
 		frames++;
+
+		free(points);
 	}
+	free(indices);
 	glfwTerminate();
 	return 0;
 }

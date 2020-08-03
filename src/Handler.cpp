@@ -24,7 +24,7 @@ float* Handler::getPoints(){
     for(auto & p : mParticles){
         for(int i = 0; i < CIRCLERESOLUTION; i++){
             points[6 * (i + CIRCLERESOLUTION * counter)] = mUnitCircle[2*i] * p.mRadius + p.mX ;
-			points[6 * (i + CIRCLERESOLUTION * counter) + 1] = mUnitCircle[2*i + 1] * p.mRadius + p.mY;
+			points[6 * (i + CIRCLERESOLUTION * counter) + 1] = mUnitCircle[2*i+1] * p.mRadius + p.mY;
 			points[6 * (i + CIRCLERESOLUTION * counter) + 2] = (p.mCharge < 0 ? 0.30980 : 0.94187);
 			points[6 * (i + CIRCLERESOLUTION * counter) + 3] = (p.mCharge < 0 ? 0.40392 : 0.24706);
 			points[6 * (i + CIRCLERESOLUTION * counter) + 4] = (p.mCharge < 0 ? 0.94118 : 0.19608);
@@ -70,20 +70,12 @@ unsigned int Handler::getNumPoints(){
 
 void Handler::tick(){
 	for( int j = 0; j < mParticles.size(); j++){
-
-
-
 		for( int i = j+1; i < mParticles.size(); i++){
-			mParticles[i].applyForces(mParticles[j]);
 			mParticles[i].collide(mParticles[j]);
-
+			mParticles[i].applyForces(mParticles[j]);
 		}
 
-
-	}
-	for( int j = 0; j < mParticles.size(); j++){
 		mParticles[j].tick();
+
 	}
-
-
 }

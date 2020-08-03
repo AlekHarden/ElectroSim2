@@ -17,6 +17,7 @@ Particle::Particle(float x, float y, float radius,float charge) {
 	mAccY = 0;
 	mRadius = radius;
 	mMass = PI * radius * radius * DENSITY;
+	//mMass = PI * 20 * 20 * DENSITY;
 }
 
 
@@ -73,8 +74,9 @@ void Particle::collide(Particle& p) {
 	float dy = mY - p.mY;
 	double dist = sqrt(dx * dx + dy * dy);
 
-
 	if (dist > mRadius + p.mRadius) return;
+
+
 
 	// Calculate how much the particles have to move
 	double overlap = dist - (mRadius + p.mRadius);
@@ -87,38 +89,28 @@ void Particle::collide(Particle& p) {
 	p.mX += xOff;
 	p.mY += yOff;
 
-
-
-
 	//Do dynamic collisions
-
 	dx = mX - p.mX;
 	dy = mY - p.mY;
 	float vRelx = mVelX - p.mVelX;
 	float vRely = mVelY - p.mVelY;
-	float relVel = sqrt(vRelx * vRelx + vRely * vRely);
 	dist = sqrt(dx * dx + dy * dy);
-
-	// Yes math... indeed...
 
 	// Normal Vector
 	float nx = -dx / dist;
 	float ny = -dy / dist;
 
-	float Ix = (mMass * p.mMass) / (mMass + p.mMass) * (1 + ELASTICITY) * (p.mVelX - mVelX);
-	float Iy = (mMass * p.mMass) / (mMass + p.mMass) * (1 + ELASTICITY) * (p.mVelY - mVelY);
+	// Dot Product of subtracted Vel. and normal
+	float dProd = (mVelX - p.mVelX) * nx + (mVelY - p.mVelY) * ny;
 
-	// Apply the collision
-	//((1/((5*relVel)+6.67)) + 0.85 )
-	// mVelX = ( tx * dpTan1 + nx * m1 );
-	// mVelY = ( ty * dpTan1 + ny * m1 );
-	// p.mVelX = ( tx * dpTan2 + nx * m2 );
-	// p.mVelY = ( ty * dpTan2 + ny * m2 );
+	// Impulse
+	float Jn = (mMass * p.mMass) / (mMass + p.mMass) * (1 + ELASTICITY) * (dProd);
 
-	mVelX -= (Ix / mMass) * nx;
-	mVelY -= (Iy / mMass) * ny;
-	p.mVelX += (Ix / p.mMass) * nx;
-	p.mVelY += (Iy / p.mMass) * ny;
+	mVelX -= Jn / mMass * nx;
+	mVelY -= Jn / mMass * ny;
+
+	p.mVelX += Jn / p.mMass * nx;
+	p.mVelY += Jn / p.mMass * ny;
 }
 
 void Particle::tick() {

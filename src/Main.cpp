@@ -102,9 +102,10 @@ int main(void) {
 
 	Handler h;
 
-	for(int i = 0; i < 80;i++ ){
-		h.addParticle(*new Particle(randNum() * WIDTH,randNum() * HEIGHT, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.00001));
+	for(int i = 0; i < 100;i++ ){
+		h.addParticle(*new Particle(randNum() * WIDTH,randNum() * HEIGHT,(float)rand()/RAND_MAX*100,( rand()%2 == 0 ? 1 : -1 ) * 0.00001));
 	}
+
 
 
 
@@ -160,16 +161,11 @@ int main(void) {
 	shader.Unbind();
 
 
-
-	float l = 0.5;
-	float increment = 0.05f;
-
 	while (!glfwWindowShouldClose(window)) {
 		h.tick();
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		shader.Bind();
-		//shader.SetUniform4f("u_Color", l, 0.5, 1, 1.0);
 
 		glBindVertexArray(vao);
 		ib.Bind();
@@ -177,14 +173,6 @@ int main(void) {
 		vb.setPoints((void*)pixelToScreen(points,h.getNumPoints()),sizeof(float) * 6 * h.getNumPoints());
 
 		glDrawElements(GL_TRIANGLES,h.getNumInd(), GL_UNSIGNED_INT, nullptr);
-
-
-
-		if (l < 0 || l > 1) {
-			increment *= -1;
-		}
-
-		l += increment;
 
 
 		/* Swap front and back buffers */

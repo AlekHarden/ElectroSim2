@@ -15,6 +15,7 @@
 #include <ElectroSim/Shader.hpp>
 #include <ElectroSim/Renderer.hpp>
 #include <ElectroSim/Handler.hpp>
+#include <ElectroSim/InputHandler.hpp>
 #include <ElectroSim/OpenGLError.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -162,7 +163,8 @@ int main(void) {
 	// Spent 3 hours on this one line of code
 	glClearColor(0.1,0.1,0.1,1);
 
-
+	// Make InputHandler
+	InputHandler inHandler(window);
 
 	while (!glfwWindowShouldClose(window)) {
 

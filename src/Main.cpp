@@ -25,25 +25,10 @@ static int Width;
 static int Height;
 
 
-
+// return random number from -0.5 to 0.5
 float randNum(){
 	return (((float)rand() - (float)RAND_MAX/2) / (float)RAND_MAX);
 }
-
-
-
-
-float* pixelToScreen(float *points,int count){
-	for(int i = 0; i < count; i++) {
-		points[i*6] /= (float)Width/2;
-		points[i*6 + 1] /= (float)Height/2;
-	}
-	return points;
-}
-
-
-
-
 
 
 
@@ -128,15 +113,19 @@ int main(void) {
 		h.addParticle(*new Particle(randNum() * Width,randNum() * Height,20,( rand()%2 == 0 ? 1 : -1 ) * 0.0001));
 	}
 
+	float scale = 0.5;
+	float panx = 0;
+	float pany = 0;
 	//glm::mat4 proj = glm::ortho(-Width/2,Width/2,-Height/2,Height/2,1,1);
-	glm::mat4 proj = glm::ortho(-Width/2.0f, Width/2.0f, -Height/2.0f, Height/2.0f, -1.0f, 1.0f);
-
+	glm::mat4 proj = glm::ortho(scale * -Width/2.0f, scale * Width/2.0f, scale * -Height/2.0f, scale * Height/2.0f, -1.0f, 1.0f);
+	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-panx,-pany,0));
+	glm::mat4 mvp = proj * view;
 
 	unsigned int* indices = h.getIndices();
 	IndexBuffer ib(indices,h.getNumInd());
 
 	VertexArray va;
-	VertexBuffer vb((void*)h.getPoints(),sizeof(float) * 6 * h.getNumPoints());
+	VertexBuffer vb(nullptr,sizeof(float) * 6 * h.getNumPoints());
 	VertexBufferLayout layout;
 
 	//Position Vec 2
@@ -147,7 +136,7 @@ int main(void) {
 
 	Shader shader("../res/shaders/basic/vertex.shader","../res/shaders/basic/fragment.shader");
 	shader.Bind();
-	shader.SetUniformMat4f("u_MVP",proj);
+	shader.SetUniformMat4f("u_MVP",mvp);
 	Renderer renderer;
 
 	unsigned int frames = 0;
@@ -183,6 +172,7 @@ int main(void) {
 
 		/* Poll for and process events */
 		glfwPollEvents();
+
 
 
 

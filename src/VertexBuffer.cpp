@@ -43,5 +43,7 @@ void VertexBuffer::Unbind() const {
 
 void VertexBuffer::setPoints(void* data, unsigned int size){
 	glBindBuffer(GL_ARRAY_BUFFER,mRendererID);
-	glBufferData(GL_ARRAY_BUFFER, size,(const void*) data, GL_DYNAMIC_DRAW);
+	//glBufferData(GL_ARRAY_BUFFER, size,(const void*) data, GL_DYNAMIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER,0, size,(const void*) data);
+
 }

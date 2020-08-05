@@ -16,6 +16,9 @@
 #include <ElectroSim/Renderer.hpp>
 #include <ElectroSim/Handler.hpp>
 #include <ElectroSim/OpenGLError.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
 
 static int Width;
 static int Height;
@@ -61,12 +64,17 @@ int main(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
 	// ------- ENABLE DEBUG MODE -------
-	// glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+	//glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
 
 	if(FULLSCREEN) {
 		/* Create a fullscreen mode window and its OpenGL context */
 		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		//BitDepth
+		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+		//RefreshRate
 		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 		window = glfwCreateWindow(mode->width, mode->height, "ElectroSim2",glfwGetPrimaryMonitor(), NULL);
 		Width = (int)mode->width;
@@ -119,13 +127,15 @@ int main(void) {
 		h.addParticle(*new Particle(randNum() * Width,randNum() * Height,20,( rand()%2 == 0 ? 1 : -1 ) * 0.0001));
 	}
 
+	//glm::mat4 proj = glm::ortho(-Width/2,Width/2,-Height/2,Height/2,1,1);
+	glm::mat4 proj = glm::ortho(-Width/2.0f, Width/2.0f, -Height/2.0f, Height/2.0f, -1.0f, 1.0f);
 
 
 	unsigned int* indices = h.getIndices();
 	IndexBuffer ib(indices,h.getNumInd());
 
 	VertexArray va;
-	VertexBuffer vb((void*)pixelToScreen(h.getPoints(),h.getNumPoints()),sizeof(float) * 6 * h.getNumPoints());
+	VertexBuffer vb((void*)h.getPoints(),sizeof(float) * 6 * h.getNumPoints());
 	VertexBufferLayout layout;
 
 	//Position Vec 2
@@ -135,8 +145,9 @@ int main(void) {
 	va.AddBuffer(vb,layout);
 
 	Shader shader("../res/shaders/basic/vertex.shader","../res/shaders/basic/fragment.shader");
+	shader.Bind();
+	shader.SetUniformMat4f("u_MVP",proj);
 	Renderer renderer;
-
 
 	unsigned int frames = 0;
 	unsigned int framerate;
@@ -157,7 +168,7 @@ int main(void) {
 
 		h.tick();
 		float* points = h.getPoints();
-		vb.setPoints((void*)pixelToScreen(points,h.getNumPoints()),sizeof(float) * 6 * h.getNumPoints());
+		vb.setPoints((void*)points,sizeof(float) * 6 * h.getNumPoints());
 
 
 		// Clear with Color We set earlier

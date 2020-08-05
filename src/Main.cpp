@@ -113,7 +113,7 @@ int main(void) {
 		h.addParticle(*new Particle(randNum() * Width,randNum() * Height,20,( rand()%2 == 0 ? 1 : -1 ) * 0.0001));
 	}
 
-	float scale = 0.5;
+	float scale = 1;
 	float panx = 0;
 	float pany = 0;
 	//glm::mat4 proj = glm::ortho(-Width/2,Width/2,-Height/2,Height/2,1,1);

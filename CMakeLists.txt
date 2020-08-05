@@ -3,21 +3,14 @@ project(ElectroSim2)
 
 # Include libraries
 include_directories(include)
-file(GLOB LIB "lib/*")
 
 # Set Sources
 file(GLOB SOURCES "src/*.cpp")
 
-
-# ifeq ($(shell uname), Linux)
-# 	LIBS = -lpthread -lglfw -lGLEW -lGL
-# else
-# 	LIBS = -lglfw3 -lglew32s -lopengl32
-
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_executable(ElectroSim2 ${SOURCES})
 
@@ -29,6 +22,7 @@ if(CMAKE_HOST_UNIX)
     #     VERBATIM
     # )
 else()
+    file(GLOB LIB "lib/windows/*")
     target_link_libraries(ElectroSim2 ${LIB} -lgdi32 -static-libgcc -static-libstdc++)
     add_custom_target(
         ElectroSimRun ALL

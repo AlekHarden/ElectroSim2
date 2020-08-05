@@ -74,14 +74,39 @@ unsigned int Handler::getNumPoints(){
     return mParticles.size() * (CIRCLERESOLUTION);
 }
 
+bool Handler::grabParticles(double xPos, double yPos){
+	for(int i = 0; i < mParticles.size(); i++){
+		if(mParticles[i].contains(xPos, yPos)){
+			mHolding = true;
+			mParticles[i].mHeld = 1;
+			mParticles[i].mGrabX = mParticles[i].mX;
+			mParticles[i].mGrabY = mParticles[i].mY;
+			std::cout << "holding\n";
+		}
+	}
+	return mHolding;
+}
+
+void Handler::releaseParticles(){
+	for(int i = 0; i <  mParticles.size(); i++){
+			mParticles[i].mHeld = 0;
+	}
+	mHolding = 0;
+}
+
+void Handler::setDelta(double delX, double delY){
+	mDelX = delX;
+	mDelY = delY;
+}
+
 void Handler::tick(){
 	for( int j = 0; j < mParticles.size(); j++){
 		for( int i = j+1; i < mParticles.size(); i++){
 			mParticles[i].collide(mParticles[j]);
 			mParticles[i].applyForces(mParticles[j]);
 		}
-
-		mParticles[j].tick();
+		if(mParticles[j].mHeld) mParticles[j].tick(mDelX, mDelY);
+		else mParticles[j].tick();
 
 	}
 }

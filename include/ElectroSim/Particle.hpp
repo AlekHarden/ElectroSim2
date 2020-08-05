@@ -9,7 +9,7 @@
 class Particle {
 
 public:
-float mCharge, mVelX, mVelY, mAccX, mAccY, mMass, mRadius, mX, mY;
+float mCharge, mVelX, mVelY, mAccX, mAccY, mMass, mRadius, mX, mY, mGrabX, mGrabY;
 
 unsigned int mIndices[3 * (CIRCLERESOLUTION - 2)];
 float mPoints[2 * CIRCLERESOLUTION];
@@ -22,9 +22,11 @@ Particle(const Particle& p);
 };
 void applyForces(Particle& p);
 void collide(Particle& p);
+bool contains(double x, double y);
 
 //virtual void render() = 0;
 void tick();
+void tick(double delX, double delY);
 void test();
 };
 

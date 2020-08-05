@@ -121,22 +121,22 @@ int main(void) {
 
 
 
-	Handler h;
+	Handler handler;
 
 	// Spawn Particles in random Locations w/ Random Charges
 	for(int i = 0; i <200; i++ ) {
-		h.addParticle(*new Particle(randNum() * Width,randNum() * Height,20,( rand()%2 == 0 ? 1 : -1 ) * 0.0001));
+		handler.addParticle(*new Particle(randNum() * Width,randNum() * Height,20,( rand()%2 == 0 ? 1 : -1 ) * 0.0001));
 	}
 
 	//glm::mat4 proj = glm::ortho(-Width/2,Width/2,-Height/2,Height/2,1,1);
 	glm::mat4 proj = glm::ortho(-Width/2.0f, Width/2.0f, -Height/2.0f, Height/2.0f, -1.0f, 1.0f);
 
 
-	unsigned int* indices = h.getIndices();
-	IndexBuffer ib(indices,h.getNumInd());
+	unsigned int* indices = handler.getIndices();
+	IndexBuffer ib(indices,handler.getNumInd());
 
 	VertexArray va;
-	VertexBuffer vb((void*)h.getPoints(),sizeof(float) * 6 * h.getNumPoints());
+	VertexBuffer vb((void*)handler.getPoints(),sizeof(float) * 6 * handler.getNumPoints());
 	VertexBufferLayout layout;
 
 	//Position Vec 2
@@ -164,13 +164,13 @@ int main(void) {
 	glClearColor(0.1,0.1,0.1,1);
 
 	// Make InputHandler
-	InputHandler inHandler(window);
+	InputHandler inHandler(window, &handler);
 
 	while (!glfwWindowShouldClose(window)) {
 
-		h.tick();
-		float* points = h.getPoints();
-		vb.setPoints((void*)points,sizeof(float) * 6 * h.getNumPoints());
+		handler.tick();
+		float* points = handler.getPoints();
+		vb.setPoints((void*)points,sizeof(float) * 6 * handler.getNumPoints());
 
 
 		// Clear with Color We set earlier
@@ -189,7 +189,7 @@ int main(void) {
 		elapsedTime = ns() / 1000000000.0 - timeStart;
 
 		if (elapsedTime >= 1) {
-			//h.addVelall();
+			//handler.addVelall();
 			framerate = frames;
 			timeStart = ns() / 1000000000.0;
 			frames = 0;

@@ -5,15 +5,17 @@
 #include <algorithm>
 #include <ElectroSim/Particle.hpp>
 
-
 class Handler{
 private:
-    std::vector<Particle> mParticles;
 	float mUnitCircle[CIRCLERESOLUTION *2];
 	unsigned int mIndices[3*(CIRCLERESOLUTION-2)];
 
 
 public:
+    std::vector<Particle> mParticles;
+    bool mHolding = false;
+    double mDelX = 0;
+    double mDelY = 0;
     Handler();
     float* getPoints();
     unsigned int* getIndices();
@@ -22,10 +24,10 @@ public:
     unsigned int getNumInd();
     unsigned int getNumPoints();
 	void addVelall();
-
-
+    bool grabParticles(double xPos, double yPos);
+    void releaseParticles();
+    void setDelta(double delX, double delY);
 	void tick();
 };
-
 
 #endif

@@ -1,5 +1,4 @@
 #include <ElectroSim/Particle.hpp>
-#include <iostream>
 
 
 
@@ -112,9 +111,12 @@ void Particle::collide(Particle& p) {
 	p.mVelY += Jn / p.mMass * ny;
 }
 
+bool Particle::contains(double x, double y){
+	return ((mX-x) * (mX-x) + (mY-y) * (mY-y) < (mRadius * mRadius));
+}
+
 void Particle::tick() {
 	//std::cout << "charge " << mCharge << std::endl;
-
 	mAccX -= mVelX * FRICTION;
 	mAccY -= mVelY * FRICTION;
 	mVelX += mAccX;
@@ -123,6 +125,12 @@ void Particle::tick() {
 	mY += mVelY;
 	mAccX = 0;
 	mAccY = 0;
+}
+
+void Particle::tick(double delX, double delY){
+	mX = delX + mGrabX;
+	mY = delY + mGrabY;
+
 }
 
 // Test function until implementation of graphics

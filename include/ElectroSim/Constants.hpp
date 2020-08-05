@@ -9,7 +9,7 @@ const double FRICTION = 0.0001;
 const double CHARGE = 1.0;         // 0.001
 const int CIRCLERESOLUTION = 20; // Must be at least 3
 
-const bool FULLSCREEN = true;
+const bool FULLSCREEN = false;
 const int WIDTH = 1024; // Default Windowed Resolution
 const int HEIGHT = 576;
 

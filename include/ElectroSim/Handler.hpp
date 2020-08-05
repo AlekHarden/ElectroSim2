@@ -21,6 +21,8 @@ public:
     void removeParticle();
     unsigned int getNumInd();
     unsigned int getNumPoints();
+	void addVelall();
+
 
 	void tick();
 };

@@ -2,18 +2,18 @@
 #define VERTEXBUFFER_HPP
 class VertexBuffer {
 private:
-	unsigned int mRendererID;
+unsigned int mRendererID;
 public:
-	VertexBuffer(void* data, unsigned int size);
-	~VertexBuffer();
 
-	void Bind() const;
-	void Unbind() const;
+VertexBuffer(void* data, unsigned int size );         //'size' in bytes
+VertexBuffer(VertexBuffer& vb);
+VertexBuffer();
+~VertexBuffer();
 
-	void setPoints(void* data, unsigned int size);
+void Bind() const;
+void Unbind() const;
 
-
-
+void setPoints(void* data, unsigned int size);
 
 };
 #endif

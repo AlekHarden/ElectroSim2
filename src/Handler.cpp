@@ -56,6 +56,12 @@ void Handler::addParticle(Particle p){
     mParticles.push_back(p);
 }
 
+void Handler::addVelall(){
+	for( int j = 0; j < mParticles.size(); j++){
+		mParticles[j].mVelX +=1;
+	}
+}
+
 void Handler::removeParticle(){
     std::remove_if(mParticles.begin(), mParticles.end(), [&](Particle p){return p.mHeld;});
 }

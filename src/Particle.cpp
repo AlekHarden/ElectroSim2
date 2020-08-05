@@ -76,8 +76,6 @@ void Particle::collide(Particle& p) {
 
 	if (dist > mRadius + p.mRadius) return;
 
-
-
 	// Calculate how much the particles have to move
 	double overlap = dist - (mRadius + p.mRadius);
 	float xOff = overlap * 0.5 * dx / dist;
@@ -89,11 +87,12 @@ void Particle::collide(Particle& p) {
 	p.mX += xOff;
 	p.mY += yOff;
 
+
+
+
 	//Do dynamic collisions
 	dx = mX - p.mX;
 	dy = mY - p.mY;
-	float vRelx = mVelX - p.mVelX;
-	float vRely = mVelY - p.mVelY;
 	dist = sqrt(dx * dx + dy * dy);
 
 	// Normal Vector

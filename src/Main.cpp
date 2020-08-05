@@ -12,24 +12,24 @@
 #include <nano/nano.hpp>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ElectroSim/VertexBuffer.hpp>
-#include <ElectroSim/IndexBuffer.hpp>
 #include <ElectroSim/Shader.hpp>
+#include <ElectroSim/Renderer.hpp>
 #include <ElectroSim/Handler.hpp>
+#include <ElectroSim/OpenGLError.hpp>
+
+
 
 float randNum(){
 	return (((float)rand() - (float)RAND_MAX/2) / (float)RAND_MAX);
 }
 
 
+
+
 float* pixelToScreen(float *points,int count){
-	for(int i = 0; i < count ; i++){
-		//std::cout << "Points[" << i << "] = " << points[i*2] << ", " <<  points[i*2+1] << std::endl
+	for(int i = 0; i < count; i++) {
 		points[i*6] /= (float)WIDTH/2;
 		points[i*6 + 1] /= (float)HEIGHT/2;
-
-		//std::cout << "Points[" << i << "] (scaled) = " << points[i*2] << ", " <<  points[i*2+1] << std::endl;
-
 	}
 	return points;
 }
@@ -38,24 +38,10 @@ float* pixelToScreen(float *points,int count){
 
 
 
-void GLAPIENTRY MessageCallback(
-	GLenum source,
-	GLenum type,
-	GLuint id,
-	GLenum severity,
-	GLsizei length,
-	const GLchar* message,
-	const void* userParam ){
 
-		if (severity != GL_DEBUG_SEVERITY_NOTIFICATION){
-			fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", ( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ), type, severity, message );
-		}
-
-
-}
 
 void test() {
-	std::cout << "yo from thread" << std::endl;
+	std::cout << "Thread Test" << std::endl;
 }
 
 
@@ -71,11 +57,15 @@ int main(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+	// ------- ENABLE DEBUG MODE -------
+	// glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
 
-	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(WIDTH, HEIGHT, "ElectroSim",NULL, NULL);
-	//glfwGetPrimaryMonitor()
+	/* Create a fullscreen mode window and its OpenGL context */
+	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+	window = glfwCreateWindow(WIDTH, HEIGHT, "ElectroSim2",glfwGetPrimaryMonitor(), NULL);
 
 	if (!window) {
 		glfwTerminate();
@@ -89,107 +79,95 @@ int main(void) {
 
 
 	if (glewInit() != GLEW_OK) {
-		std::cout << "Error" << std::endl;
+		std::cout << "glewInit Error" << std::endl;
 	}
 
+	// Let user know if its in debug mode.
+	GLint flags;
+	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
+	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+		std::cout << "** DEBUG MODE **" << std::endl;
+	}
+
+	// Enable DebugMessageCallback
 	glEnable( GL_DEBUG_OUTPUT );
+	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback( MessageCallback, 0 );
 
-	std::cout << glGetString(GL_VERSION) << std::endl << std::endl;
-	/* Loop until the user closes the window */
+	// Print OpenGL Version
+	std::cout << "\nOpenGL "<< glGetString(GL_VERSION) << std::endl;
 
 
 
 	Handler h;
 
-	for(int i = 0; i < 100;i++ ){
-		h.addParticle(*new Particle(randNum() * WIDTH,randNum() * HEIGHT,(float)rand()/RAND_MAX*100,( rand()%2 == 0 ? 1 : -1 ) * 0.00001));
+	// Spawn Particles in random Locations w/ Random Charges
+	for(int i = 0; i <200; i++ ) {
+		h.addParticle(*new Particle(randNum() * WIDTH,randNum() * HEIGHT,20,( rand()%2 == 0 ? 1 : -1 ) * 0.0001));
 	}
 
-
-
-
-
-
-
-
-
-	std::thread t1(test);
-	t1.join();
-
-	unsigned int vao;
-	glGenVertexArrays(1,&vao);
-	glBindVertexArray(vao);
-
-
-	std::cout << "NumPoints: " << h.getNumPoints() << std::endl;
-	std::cout << "NumInd: " << h.getNumInd() << std::endl;
-	std::cout << "SizePoints: " << sizeof(float) * 2 * h.getNumPoints() << std::endl;
-    VertexBuffer vb((void*)pixelToScreen(h.getPoints(),h.getNumPoints()),sizeof(float) * 6 * h.getNumPoints());
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (const void*)8);
 
 
 	unsigned int* indices = h.getIndices();
 	IndexBuffer ib(indices,h.getNumInd());
 
-	//Create Shader
-	std::string vertexShader;
-	std::string fragmentShader;
-	// Error Handling for opening shader files
-	try {
-		vertexShader = ReadShaderFile("../res/shaders/basic/vertex.shader");
-		fragmentShader = ReadShaderFile("../res/shaders/basic/fragment.shader");
-	} catch (std::string e) {
-		std::cout << e;
-	}
-	Shader shader(vertexShader,fragmentShader);
-	shader.Bind();
-	//shader.SetUniform4f("u_Color", 1.0, 0.5, 0.0, 1.0);
+	VertexArray va;
+	VertexBuffer vb((void*)pixelToScreen(h.getPoints(),h.getNumPoints()),sizeof(float) * 6 * h.getNumPoints());
+	VertexBufferLayout layout;
+
+	//Position Vec 2
+	layout.Push(GL_FLOAT,2);
+	//Color Vec 4
+	layout.Push(GL_FLOAT,4);
+	va.AddBuffer(vb,layout);
+
+	Shader shader("../res/shaders/basic/vertex.shader","../res/shaders/basic/fragment.shader");
+	Renderer renderer;
+
 
 	unsigned int frames = 0;
 	unsigned int framerate;
 	double elapsedTime;
 	double timeStart = ns() / 1000000000.0;
 
-	glBindVertexArray(0);
+	va.Unbind();
 	vb.Unbind();
 	ib.Unbind();
 	shader.Unbind();
 
+	// Spent 3 hours on this one line of code
+	glClearColor(0.1,0.1,0.1,1);
+
+
 
 	while (!glfwWindowShouldClose(window)) {
+
 		h.tick();
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		shader.Bind();
-
-		glBindVertexArray(vao);
-		ib.Bind();
 		float* points = h.getPoints();
 		vb.setPoints((void*)pixelToScreen(points,h.getNumPoints()),sizeof(float) * 6 * h.getNumPoints());
 
-		glDrawElements(GL_TRIANGLES,h.getNumInd(), GL_UNSIGNED_INT, nullptr);
+
+		// Clear with Color We set earlier
+		renderer.Clear();
+		renderer.Draw(va,ib,shader);
 
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
-
 		/* Poll for and process events */
 		glfwPollEvents();
+
 
 
 		elapsedTime = ns() / 1000000000.0 - timeStart;
 
 		if (elapsedTime >= 1) {
+			//h.addVelall();
 			framerate = frames;
 			timeStart = ns() / 1000000000.0;
 			frames = 0;
-			std::cout << framerate << " " << std::endl;
+			std::cout << "FPS: " << framerate << std::endl;
 		}
 
 		frames++;

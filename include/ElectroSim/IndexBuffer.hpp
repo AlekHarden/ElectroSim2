@@ -2,16 +2,21 @@
 #define INDEXBUFFER_HPP
 class IndexBuffer {
 private:
-	unsigned int mRendererID;
-	unsigned int mCount;
+unsigned int mCount;
+unsigned int mRendererID;
+
 public:
-	IndexBuffer(const unsigned int *data, unsigned int count);
-	~IndexBuffer();
+IndexBuffer();
+IndexBuffer(const IndexBuffer& i);
+IndexBuffer(const unsigned int *data, unsigned int count);
+~IndexBuffer();
 
-	void Bind() const;
-	void Unbind() const;
+void Bind() const;
+void Unbind() const;
 
 
-	inline unsigned int GetCount() const { return mCount; }
+unsigned int GetCount() const {
+	return mCount;
+}
 };
 #endif

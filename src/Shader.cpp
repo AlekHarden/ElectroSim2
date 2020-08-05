@@ -5,7 +5,17 @@
 #include <ElectroSim/Shader.hpp>
 
 
-Shader::Shader(const std::string& vertexShader,const std::string& fragmentShader) : mRendererID(0){
+Shader::Shader(const std::string& vertexShaderFilePath,const std::string& fragmentShaderFilePath) : mRendererID(0){
+	//Create Shader
+	std::string vertexShader;
+	std::string fragmentShader;
+	// Error Handling for opening shader files
+	try {
+		vertexShader = ReadShaderFile(vertexShaderFilePath);
+		fragmentShader = ReadShaderFile(fragmentShaderFilePath);
+	} catch (std::string e) {
+		std::cout << e;
+	}
 	mRendererID = CreateShader(vertexShader, fragmentShader);
 }
 
@@ -15,7 +25,7 @@ Shader::~Shader(){
 
 unsigned int Shader::GetUniformLocation(const std::string& name){
 	int location = glGetUniformLocation(mRendererID, name.c_str());
-	if( location == -1){
+	if( location == -1) {
 		std::cout << "Warning: uniform '" << name << "' doesn't exist!" << std::endl;
 	}
 	return location;
@@ -30,11 +40,11 @@ void Shader::SetUniform4f(const std::string name, float v0, float v1, float v2, 
 
 
 
-void Shader::Bind() const{
+void Shader::Bind() const {
 	glUseProgram(mRendererID);
 }
 
-void Shader::Unbind() const{
+void Shader::Unbind() const {
 	glUseProgram(0);
 
 }
@@ -86,7 +96,7 @@ unsigned int Shader::CompileShader(unsigned int type, const std::string& source)
 }
 
 
-std::string ReadShaderFile(std::string filepath) {
+std::string Shader::ReadShaderFile(std::string filepath) {
 
 	char buffer[100];
 	char cbullshit;

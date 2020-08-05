@@ -4,7 +4,26 @@
 #include <GL/glew.h>
 #include <iostream>
 
+
+IndexBuffer::IndexBuffer(){
+
+}
+
+IndexBuffer::IndexBuffer(const IndexBuffer& i){
+	mRendererID = i.mRendererID;
+	std::cout << "mRendererID (copy): "<< mRendererID<< std::endl;
+
+}
+
 IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count) : mCount(count) {
+
+
+
+	glGenBuffers(1, &mRendererID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mRendererID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW);
+
+	// // ------- Print Data -------
 	// std::cout << "Indicies: "<< std::endl;
 	//
 	// for(int i = 0; i < count/3; i++) {
@@ -12,10 +31,6 @@ IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count) : mCount(
 	// }
 	// std::cout << std::endl;
 
-
-	glGenBuffers(1, &mRendererID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mRendererID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW);
 
 }
 

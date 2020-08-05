@@ -17,6 +17,9 @@
 #include <ElectroSim/Handler.hpp>
 #include <ElectroSim/OpenGLError.hpp>
 
+static int Width;
+static int Height;
+
 
 
 float randNum(){
@@ -28,8 +31,8 @@ float randNum(){
 
 float* pixelToScreen(float *points,int count){
 	for(int i = 0; i < count; i++) {
-		points[i*6] /= (float)WIDTH/2;
-		points[i*6 + 1] /= (float)HEIGHT/2;
+		points[i*6] /= (float)Width/2;
+		points[i*6 + 1] /= (float)Height/2;
 	}
 	return points;
 }
@@ -61,11 +64,21 @@ int main(void) {
 	// glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
 
-	/* Create a fullscreen mode window and its OpenGL context */
-	const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-	glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+	if(FULLSCREEN) {
+		/* Create a fullscreen mode window and its OpenGL context */
+		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+		window = glfwCreateWindow(mode->width, mode->height, "ElectroSim2",glfwGetPrimaryMonitor(), NULL);
+		Width = (int)mode->width;
+		Height = (int)mode->height;
 
-	window = glfwCreateWindow(WIDTH, HEIGHT, "ElectroSim2",glfwGetPrimaryMonitor(), NULL);
+	}
+	else{
+		/* Create a windowed mode window and its OpenGL context */
+		window = glfwCreateWindow(WIDTH,HEIGHT, "ElectroSim2",NULL, NULL);
+		Width = WIDTH;
+		Height = HEIGHT;
+	}
 
 	if (!window) {
 		glfwTerminate();
@@ -103,7 +116,7 @@ int main(void) {
 
 	// Spawn Particles in random Locations w/ Random Charges
 	for(int i = 0; i <200; i++ ) {
-		h.addParticle(*new Particle(randNum() * WIDTH,randNum() * HEIGHT,20,( rand()%2 == 0 ? 1 : -1 ) * 0.0001));
+		h.addParticle(*new Particle(randNum() * Width,randNum() * Height,20,( rand()%2 == 0 ? 1 : -1 ) * 0.0001));
 	}
 
 

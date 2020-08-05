@@ -12,7 +12,7 @@ file(GLOB SOURCES "src/*.cpp")
 # ifeq ($(shell uname), Linux)
 # 	LIBS = -lpthread -lglfw -lGLEW -lGL
 # else
-# 	LIBS = -lglfw3dll -lglew32s -lopengl32
+# 	LIBS = -lglfw3 -lglew32s -lopengl32
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

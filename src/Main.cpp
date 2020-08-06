@@ -105,28 +105,36 @@ int main(void) {
 	std::cout << "\nOpenGL "<< glGetString(GL_VERSION) << std::endl;
 
 
+	float scale = 2;
+	float panx = 0;
+	float pany = 0;
 
 	Handler handler;
 
-	// Spawn Particles in random Locations w/ Random Charges
-	for(int i = 0; i <200; i++ ) {
-		handler.addParticle(*new Particle(randNum() * Width,randNum() * Height,20,( rand()%2 == 0 ? 1 : -1 ) * 0.0001));
+	//Spawn Particles in random Locations w/ Random Charges
+	for(int i = 0; i <40; i++ ) {
+
+		handler.addParticle(Particle(randNum() * Width * scale,randNum() * Height * scale, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.00001));
+		//list test
+		//tempP = new Particle((float)i*100,0,20,( rand()%2 == 0 ? 1 : -1 ) * 0.000);
 	}
 
-	float scale = 1;
-	float panx = 0;
-	float pany = 0;
-	//glm::mat4 proj = glm::ortho(-Width/2,Width/2,-Height/2,Height/2,1,1);
-	glm::mat4 proj = glm::ortho(scale * -Width/2.0f, scale * Width/2.0f, scale * -Height/2.0f, scale * Height/2.0f, -1.0f, 1.0f);
-	glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-panx,-pany,0));
-	glm::mat4 mvp = proj * view;
 
-	unsigned int* indices = handler.getIndices();
-	IndexBuffer ib(indices,handler.getNumInd());
+
+	//glm::mat4 proj = glm::ortho(-Width/2,Width/2,-Height/2,Height/2,1,1);
+	glm::mat4 proj;
+	glm::mat4 view;
+	glm::mat4 mvp;
+	proj = glm::ortho(scale * -Width/2.0f, scale * Width/2.0f, scale * -Height/2.0f, scale * Height/2.0f, -1.0f, 1.0f);
+	view = glm::translate(glm::mat4(1.0f), glm::vec3(-panx,-pany,0));
+
+	IndexBuffer ib(nullptr,handler.getNumInd());
 
 	VertexArray va;
-	VertexBuffer vb(nullptr,sizeof(float) * 6 * h.getNumPoints());
+	VertexBuffer vb(nullptr,sizeof(float) * 6 * handler.getNumPoints());
 	VertexBufferLayout layout;
+	InputHandler inHandler(window, &handler,&scale,&panx,&pany,Width,Height,&view);
+
 
 	//Position Vec 2
 	layout.Push(GL_FLOAT,2);
@@ -134,7 +142,7 @@ int main(void) {
 	layout.Push(GL_FLOAT,4);
 	va.AddBuffer(vb,layout);
 
-	Shader shader("../res/shaders/basic/vertex.shader","../res/shaders/basic/fragment.shader");
+	Shader shader("../res/shaders/basic/vertex.vsh","../res/shaders/basic/fragment.fsh");
 	shader.Bind();
 	shader.SetUniformMat4f("u_MVP",mvp);
 	Renderer renderer;
@@ -153,18 +161,25 @@ int main(void) {
 	glClearColor(0.1,0.1,0.1,1);
 
 	// Make InputHandler
-	InputHandler inHandler(window, &handler);
-
+	float* points;
+	unsigned int* indices;
 	while (!glfwWindowShouldClose(window)) {
-
-		handler.tick();
-		float* points = handler.getPoints();
-		vb.setPoints((void*)points,sizeof(float) * 6 * handler.getNumPoints());
+		mvp = proj * view;
+		shader.SetUniformMat4f("u_MVP",mvp);
 
 
 		// Clear with Color We set earlier
 		renderer.Clear();
-		renderer.Draw(va,ib,shader);
+
+		//Draw Particles if they exist
+		if(handler.getNumPoints() != 0) {
+			handler.tick();
+			points = handler.getPoints();
+			indices = handler.getIndices();
+			ib.SetIndices(indices,handler.getNumInd());
+			vb.SetPoints((void*)points,sizeof(float) * 6 * handler.getNumPoints());
+			renderer.Draw(va,ib,shader);
+		}
 
 
 		/* Swap front and back buffers */
@@ -189,8 +204,8 @@ int main(void) {
 		frames++;
 
 		free(points);
+		free(indices);
 	}
-	free(indices);
 	glfwTerminate();
 	return 0;
 }

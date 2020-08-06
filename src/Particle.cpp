@@ -130,6 +130,11 @@ void Particle::tick() {
 void Particle::tick(double delX, double delY){
 	mX = delX + mGrabX;
 	mY = delY + mGrabY;
+	mVelX = 0;
+	mVelY = 0;
+	mAccX = 0;
+	mAccY = 0;
+
 
 }
 

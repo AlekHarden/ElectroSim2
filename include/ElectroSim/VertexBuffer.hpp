@@ -13,7 +13,7 @@ VertexBuffer();
 void Bind() const;
 void Unbind() const;
 
-void setPoints(void* data, unsigned int size);
+void SetPoints(void* data, unsigned int size);
 
 };
 #endif

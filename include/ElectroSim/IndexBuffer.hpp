@@ -9,6 +9,8 @@ public:
 IndexBuffer();
 IndexBuffer(const IndexBuffer& i);
 IndexBuffer(const unsigned int *data, unsigned int count);
+void SetIndices(const unsigned int *data, unsigned int count);
+
 ~IndexBuffer();
 
 void Bind() const;

@@ -173,6 +173,7 @@ int main(void) {
 	unsigned int* indices;
 	while (!glfwWindowShouldClose(window)) {
 		mvp = proj * view;
+		shader.Bind();
 		shader.SetUniformMat4f("u_MVP",mvp);
 
 

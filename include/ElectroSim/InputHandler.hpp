@@ -9,8 +9,8 @@
 
 static glm::vec2 MousePos;
 static glm::vec2 InitScenePos;
-static double InitX;
-static double InitY;
+static float dx;
+static float dy;
 static Handler* mHandler;
 static bool mPanning;
 static glm::mat4* mView;

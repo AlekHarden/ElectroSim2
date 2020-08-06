@@ -3,14 +3,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/glm.hpp>
 
-InputHandler::InputHandler(GLFWwindow* window, Handler* handler, float* s, float* px, float* py, float w, float h,glm::mat4* og) : mWindow(window){
-	mOG = og;
+InputHandler::InputHandler(GLFWwindow* window, Handler* handler, glm::mat4* proj, glm::mat4* view) : mWindow(window){
 	mHandler = handler;
-	mScale = s;
-	mPanX = px;
-	mPanY = py;
-	mWidth = w;
-	mHeight = h;
+	mProj = proj;
+	mView = view;
 	mPanning = 0;
 	glfwSetCursorPosCallback(mWindow, mousePosition);
 	glfwSetMouseButtonCallback(mWindow, mousePressed);
@@ -24,21 +20,44 @@ void InputHandler::getSelectedArea(float* area){
 
 void InputHandler::mousePosition(GLFWwindow* window, double xPos, double yPos){
 
-	MouseX = (xPos - mWidth/2) * (*mScale) + (*mPanX);
-	MouseY = (-1* (yPos - mHeight/2)) * (*mScale) + (*mPanY);
+
+
+
+
+
+
+
+    // (*mView)[3][0] * (*mView)[0][0]
+	// (*mView)[3][1] * (*mView)[1][1]
+
+	// Top Left Corner of proj matrix
+	// mProj[0][0] = 2 / (right - left)
+
+	float width = 1 / ((*mProj)[0][0] / 2);
+	float height = 1 / ((*mProj)[1][1] / 2);
+	float panx = (*mView)[3][0];
+	float pany = (*mView)[3][1];
+	float scale = 1 / (*mView)[0][0];
+
+	std::cout << "W H S-> " << width << " : " << height << " : " << scale << std::endl;
+	std::cout << "px py -> " << panx << " : " << pany << std::endl;
+
+							//(Width) 				//scale
+	MousePos.x = scale * (xPos - width/2) + panx ;
+	MousePos.y = -1 * (scale * (yPos - height/2) + pany);
+
+	std::cout << "Mouse: " << MousePos.x << " : " << MousePos.y << std::endl;
 	if(mPanning == true) {
 		//uh pan
-
-		*mOG = glm::translate(glm::mat4(1.0f), glm::vec3(MouseX - InitSX,MouseY - InitSY, 0)) * (*mOG);
-		InitSX = MouseX;
-		InitSY = MouseY;
+		*mView = glm::translate(glm::mat4(1.0f), glm::vec3(MousePos.x - InitScenePos.x, MousePos.y - InitScenePos.y, 0)) * (*mView);
+		InitScenePos = MousePos;
 	}
 	if(mHandler->mHolding) {
-		mHandler->setDelta(MouseX - InitX, MouseY - InitY);
+		mHandler->setDelta(MousePos.x - InitX, MousePos.y - InitY);
 	}
 
 
-	//std::cout <<"Mouse: " << MouseX << " : " << MouseY << std::endl;
+	//std::cout <<"Mouse: " << MousePos.x << " : " << MousePos.y << std::endl;
 
 }
 
@@ -47,17 +66,15 @@ void InputHandler::mousePressed(GLFWwindow* window, int button, int action, int 
 		switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT:
 			//std::cout <<"pressed" << std::endl;
-			InitX = MouseX;
-			InitY = MouseY;
-			if(!mHandler->grabParticles(MouseX, MouseY)) {
+			InitScenePos = MousePos;
+			if(!mHandler->grabParticles(MousePos.x, MousePos.y)) {
 				/*do selection box*/
 			}
 			break;
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT:
-			InitSX = MouseX;
-			InitSY = MouseY;
+			InitScenePos = MousePos;
 			mPanning = 1;
 			break;
 		}
@@ -77,9 +94,15 @@ void InputHandler::mousePressed(GLFWwindow* window, int button, int action, int 
 }
 
 void InputHandler::mouseScrolled(GLFWwindow * window, double xoffset, double yoffset){
-	//*mOG = glm::translate(glm::mat4(1.0f), glm::vec3(-(*mPanX - MouseX), -(*mPanX - MouseX), 0)) * glm::scale(glm::mat4(1.0f), glm::vec3(*mScale,  *mScale,0)) * glm::translate(glm::mat4(1.0f), glm::vec3((*mPanX - MouseX), (*mPanX - MouseX), 0)) * (*mOG);
+	float scale = 1 / (*mView)[0][0];
+	float panx = (*mView)[3][0];
+	float pany = (*mView)[3][1];
 
-	*mOG =  glm::translate(glm::mat4(1.0f), glm::vec3(-(*mPanX - MouseX), -(*mPanY - MouseY), 0)) * glm::scale(glm::mat4(1.0f), glm::vec3( (yoffset == -1 ? 0.9 : 1/0.9 ), (yoffset == -1 ? 0.9 : 1/0.9 ), 0)) * glm::translate(glm::mat4(1.0f), glm::vec3((*mPanX - MouseX), (*mPanY - MouseY), 0)) *(*mOG);
+	glm::vec3 offset (panx - MousePos.x, pany - MousePos.y , 0);
+
+	*mView = glm::translate(glm::mat4(1.0f), -1.0f * offset) * glm::scale(glm::mat4(1.0f), glm::vec3( (yoffset == -1 ? 0.9 : 1/0.9 ), (yoffset == -1 ? 0.9 : 1/0.9 ), 0)) * glm::translate(glm::mat4(1.0f), offset) * (*mView);
+
+	//*mView =  glm::translate(glm::mat4(1.0f), glm::vec3(-((*mView)[3][0] - MousePos.x), -((*mView)[3][1] - MousePos.y), 0)) * glm::scale(glm::mat4(1.0f), glm::vec3( (yoffset == -1 ? 0.9 : 1/0.9 ), (yoffset == -1 ? 0.9 : 1/0.9 ), 0)) * glm::translate(glm::mat4(1.0f), glm::vec3(((*mView)[3][0] - MousePos.x), ((*mView)[3][1] - MousePos.y), 0)) *(*mView);
 }
 
 void InputHandler::keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -87,8 +110,8 @@ void InputHandler::keyPressed(GLFWwindow* window, int key, int scancode, int act
 		switch(key) {
 		case GLFW_KEY_ESCAPE: glfwDestroyWindow(window); break;
 		case GLFW_KEY_DELETE: mHandler->removeParticle(); break;
-		case GLFW_KEY_MINUS: mHandler->addParticle(Particle(MouseX, MouseY, 20, -CHARGE)); break;
-		case GLFW_KEY_EQUAL: mHandler->addParticle(Particle(MouseX, MouseY, 20, CHARGE)); break;
+		case GLFW_KEY_MINUS: mHandler->addParticle(Particle(MousePos.x, MousePos.y, 20, -CHARGE)); break;
+		case GLFW_KEY_EQUAL: mHandler->addParticle(Particle(MousePos.x, MousePos.y, 20, CHARGE)); break;
 		}
 	}
 }

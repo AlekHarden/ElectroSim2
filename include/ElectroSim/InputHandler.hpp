@@ -7,27 +7,21 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-static double MouseX;
-static double MouseY;
+static glm::vec2 MousePos;
+static glm::vec2 InitScenePos;
 static double InitX;
 static double InitY;
-static double InitSX;
-static double InitSY;
 static Handler* mHandler;
-static float* mScale;
-static float* mPanX;
-static float* mPanY;
-static float mWidth;
-static float mHeight;
 static bool mPanning;
-static glm::mat4* mOG;
+static glm::mat4* mView;
+static glm::mat4* mProj;
 
 class InputHandler {
 private:
 GLFWwindow* mWindow;
 
 public:
-InputHandler(GLFWwindow* window, Handler* handler, float* s, float* px, float* py, float w, float h,glm::mat4* og);
+InputHandler(GLFWwindow* window, Handler* handler, glm::mat4* proj, glm::mat4* view);
 void getKeyPressed();
 void getSelectedArea(float* area);
 static void mousePosition(GLFWwindow* window, double xPos, double yPos);

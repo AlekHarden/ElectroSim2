@@ -105,7 +105,7 @@ int main(void) {
 	std::cout << "\nOpenGL "<< glGetString(GL_VERSION) << std::endl;
 
 
-	float scale = 2;
+	float scale = 1;
 	float panx = 0;
 	float pany = 0;
 
@@ -125,15 +125,23 @@ int main(void) {
 	glm::mat4 proj;
 	glm::mat4 view;
 	glm::mat4 mvp;
-	proj = glm::ortho(scale * -Width/2.0f, scale * Width/2.0f, scale * -Height/2.0f, scale * Height/2.0f, -1.0f, 1.0f);
-	view = glm::translate(glm::mat4(1.0f), glm::vec3(-panx,-pany,0));
+
+	// [0][0] = 2 / (right - left);
+	// [0][3] = -(right + left )/(right - left);
+	//
+	// [1][1] = 2 / (top - bottom);
+	// [1][3] = -(top + bottom) / (top - bottom);
+
+	//left                //right                  //bottom            //top      	//front //near
+	proj = glm::ortho(-Width/2.0f, Width/2.0f,-Height/2.0f, Height/2.0f, -1.0f, 1.0f);
+	view = glm::scale(glm::mat4(1.0f),glm::vec3(scale,scale,1.0f)) * glm::translate(glm::mat4(1.0f), glm::vec3(-panx,-pany,0));
 
 	IndexBuffer ib(nullptr,handler.getNumInd());
 
 	VertexArray va;
 	VertexBuffer vb(nullptr,sizeof(float) * 6 * handler.getNumPoints());
 	VertexBufferLayout layout;
-	InputHandler inHandler(window, &handler,&scale,&panx,&pany,Width,Height,&view);
+	InputHandler inHandler(window, &handler, &proj, &view);
 
 
 	//Position Vec 2
@@ -198,7 +206,7 @@ int main(void) {
 			framerate = frames;
 			timeStart = ns() / 1000000000.0;
 			frames = 0;
-			std::cout << "FPS: " << framerate << std::endl;
+			//std::cout << "FPS: " << framerate << std::endl;
 		}
 
 		frames++;

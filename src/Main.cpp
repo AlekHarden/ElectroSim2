@@ -105,16 +105,13 @@ int main(void) {
 	std::cout << "\nOpenGL "<< glGetString(GL_VERSION) << std::endl;
 
 
-	float scale = 1;
-	float panx = 0;
-	float pany = 0;
 
 	Handler handler;
 
 	//Spawn Particles in random Locations w/ Random Charges
-	for(int i = 0; i <40; i++ ) {
+	for(int i = 0; i <100; i++ ) {
 
-		handler.addParticle(Particle(randNum() * Width * scale,randNum() * Height * scale, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.00001));
+		handler.addParticle(Particle(randNum() * Width * SCALE,randNum() * Height * SCALE, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.00001));
 		//list test
 		//tempP = new Particle((float)i*100,0,20,( rand()%2 == 0 ? 1 : -1 ) * 0.000);
 	}
@@ -126,47 +123,66 @@ int main(void) {
 	glm::mat4 view;
 	glm::mat4 mvp;
 
-	// [0][0] = 2 / (right - left);
-	// [0][3] = -(right + left )/(right - left);
-	//
-	// [1][1] = 2 / (top - bottom);
-	// [1][3] = -(top + bottom) / (top - bottom);
-
 	//left                //right                  //bottom            //top      	//front //near
 	proj = glm::ortho(-Width/2.0f, Width/2.0f,-Height/2.0f, Height/2.0f, -1.0f, 1.0f);
-	view = glm::scale(glm::mat4(1.0f),glm::vec3(scale,scale,1.0f)) * glm::translate(glm::mat4(1.0f), glm::vec3(-panx,-pany,0));
+	view = glm::scale(glm::mat4(1.0f),glm::vec3(SCALE,SCALE,1.0f)) * glm::translate(glm::mat4(1.0f), glm::vec3(-PANX,-PANY,0));
 
-	IndexBuffer ib(nullptr,handler.getNumInd());
 
-	VertexArray va;
-	VertexBuffer vb(nullptr,sizeof(float) * 6 * handler.getNumPoints());
-	VertexBufferLayout layout;
+
 	InputHandler inHandler(window, &handler, &proj, &view);
 
 
+
+
+	//------Circle Batch-------
+	VertexBuffer vb(nullptr,sizeof(float) * 6 * handler.getNumPoints());
+	IndexBuffer ib(nullptr,handler.getNumInd());
+	VertexArray va;
+	VertexBufferLayout layout;
 	//Position Vec 2
 	layout.Push(GL_FLOAT,2);
 	//Color Vec 4
 	layout.Push(GL_FLOAT,4);
 	va.AddBuffer(vb,layout);
+	va.Unbind();
+	vb.Unbind();
+	ib.Unbind();
+	//--------------------------
 
+
+	//------Select Box-------
+	unsigned int square[6] = {0,1,2,0,2,3};
+	VertexBuffer Svb(nullptr,sizeof(float) * 6 * 4);
+	IndexBuffer Sib(nullptr,6);
+	VertexArray Sva;
+	VertexBufferLayout Slayout;
+	//Position Vec 2
+	Slayout.Push(GL_FLOAT,2);
+	//Color Vec 4
+	Slayout.Push(GL_FLOAT,4);
+	Sva.AddBuffer(Svb,Slayout);
+	Sva.Unbind();
+	Svb.Unbind();
+	Sib.Unbind();
+	//--------------------------
+
+
+	Renderer renderer;
 	Shader shader("../res/shaders/basic/vertex.vsh","../res/shaders/basic/fragment.fsh");
 	shader.Bind();
 	shader.SetUniformMat4f("u_MVP",mvp);
-	Renderer renderer;
 
 	unsigned int frames = 0;
 	unsigned int framerate;
 	double elapsedTime;
 	double timeStart = ns() / 1000000000.0;
 
-	va.Unbind();
-	vb.Unbind();
-	ib.Unbind();
-	shader.Unbind();
+
 
 	// Spent 3 hours on this one line of code
 	glClearColor(0.1,0.1,0.1,1);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	// Make InputHandler
 	float* points;
@@ -188,6 +204,19 @@ int main(void) {
 			ib.SetIndices(indices,handler.getNumInd());
 			vb.SetPoints((void*)points,sizeof(float) * 6 * handler.getNumPoints());
 			renderer.Draw(va,ib,shader);
+			free(points);
+			free(indices);
+		}
+		std::cout << "ms = " << mSelecting << std::endl;
+
+		if(inHandler.isSelecting()) {
+			std::cout << "in" << std::endl;
+			points = inHandler.getSelectedArea();
+			Sib.SetIndices(square,6);
+			Svb.SetPoints((void*)points,sizeof(float) * 6 * 4);
+			renderer.Draw(Sva,Sib,shader);
+
+			free(points);
 		}
 
 
@@ -211,9 +240,6 @@ int main(void) {
 		}
 
 		frames++;
-
-		free(points);
-		free(indices);
 	}
 	glfwTerminate();
 	return 0;

@@ -28,7 +28,7 @@ float* Handler::getPoints(){
 			points[6 * (i + CIRCLERESOLUTION * counter) + 2] = (p.mCharge < 0 ? 0.30980 : 0.94187);
 			points[6 * (i + CIRCLERESOLUTION * counter) + 3] = (p.mCharge < 0 ? 0.40392 : 0.24706);
 			points[6 * (i + CIRCLERESOLUTION * counter) + 4] = (p.mCharge < 0 ? 0.94118 : 0.19608);
-			points[6 * (i + CIRCLERESOLUTION * counter) + 5] = 1;
+			points[6 * (i + CIRCLERESOLUTION * counter) + 5] = (p.mHeld ? 0.5 : 1);
 		}
 		counter++;
 	}
@@ -63,7 +63,6 @@ void Handler::addVelall(){
 }
 
 void Handler::removeParticle(){
-	if(!mHolding) return;
 	mParticles.erase(std::remove_if(mParticles.begin(), mParticles.end(), [&](Particle& p){
 		return p.mHeld;
 	}), mParticles.end());
@@ -78,6 +77,30 @@ unsigned int Handler::getNumPoints(){
 	return mParticles.size() * (CIRCLERESOLUTION);
 }
 
+void Handler::selectArea(glm::vec2 start, glm::vec2 end){
+	float swap;
+	if(end.x < start.x) {
+		swap = end.x;
+		end.x = start.x;
+		start.x = swap;
+	}
+
+	if(end.y > start.y) {
+		swap = end.y;
+		end.y = start.y;
+		start.y = swap;
+	}
+
+	for(int i = 0; i < mParticles.size(); i++) {
+		if(mParticles[i].mX > start.x && mParticles[i].mY < start.y && mParticles[i].mX < end.x && mParticles[i].mY > end.y) {
+			mParticles[i].mHeld = 1;
+			mParticles[i].mGrabX = mParticles[i].mX;
+			mParticles[i].mGrabY = mParticles[i].mY;
+			//std::cout << "holding " << i << std::endl;
+		}
+	}
+}
+
 bool Handler::grabParticles(double xPos, double yPos){
 	for(int i = 0; i < mParticles.size(); i++) {
 		if(mParticles[i].contains(xPos, yPos)) {
@@ -85,7 +108,6 @@ bool Handler::grabParticles(double xPos, double yPos){
 			mParticles[i].mHeld = 1;
 			mParticles[i].mGrabX = mParticles[i].mX;
 			mParticles[i].mGrabY = mParticles[i].mY;
-			std::cout << "holding\n";
 		}
 	}
 	return mHolding;

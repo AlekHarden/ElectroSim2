@@ -1,13 +1,11 @@
 #include <ElectroSim/InputHandler.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/glm.hpp>
 
 InputHandler::InputHandler(GLFWwindow* window, Handler* handler, glm::mat4* proj, glm::mat4* view) : mWindow(window){
 	mHandler = handler;
 	mProj = proj;
 	mView = view;
 	mPanning = 0;
+	mSelecting = 0;
 	dx = 0;
 	dy = 0;
 	glfwSetCursorPosCallback(mWindow, mousePosition);
@@ -16,8 +14,23 @@ InputHandler::InputHandler(GLFWwindow* window, Handler* handler, glm::mat4* proj
 	glfwSetKeyCallback(mWindow, keyPressed);
 }
 
-void InputHandler::getSelectedArea(float* area){
+float* InputHandler::getSelectedArea(){
+	float* points = (float *)malloc(sizeof(float) * 24);
+	//each vertex
+	for(int i = 0; i < 4; i++) {
+		points[6 * i + 0] = (i < 2 ? selectStartPos.x : MousePos.x);
+		points[6 * i + 1] = (i == 1 || i == 2 ? MousePos.y : selectStartPos.y);
+		points[6 * i + 2] = 0.5f;
+		points[6 * i + 3] = 0.5f;
+		points[6 * i + 4] = 0.5f;
+		points[6 * i + 5] = 0.3f;
+	}
 
+	return points;
+}
+
+bool InputHandler::isSelecting(){
+	return mSelecting;
 }
 
 void InputHandler::mousePosition(GLFWwindow* window, double xPos, double yPos){
@@ -59,26 +72,39 @@ void InputHandler::mousePressed(GLFWwindow* window, int button, int action, int 
 		switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT:
 			InitScenePos = MousePos;
-			if(!mHandler->grabParticles(MousePos.x, MousePos.y)) {
-				/*do selection box*/
+
+			if(mHandler->grabParticles(MousePos.x, MousePos.y)) break;
+			else if(!mSelecting) {
+				std::cout << "selecting" <<std::endl;
+				mSelecting = true;
+				selectStartPos = MousePos;
 			}
+
 			break;
+
 		case GLFW_MOUSE_BUTTON_MIDDLE:
 			break;
-		case GLFW_MOUSE_BUTTON_RIGHT:
 
-			mPanning = 1;
+		case GLFW_MOUSE_BUTTON_RIGHT:
+			mPanning = true;
 			break;
+
 		}
 	}
 	else if(action == GLFW_RELEASE) {
 		switch (button) {
 		case GLFW_MOUSE_BUTTON_LEFT:
+			if(mSelecting) {
+				mHandler->selectArea(selectStartPos, MousePos);
+				mHandler->setDelta(0, 0);
+				mSelecting = false;
+				break;
+			}
 			mHandler->setDelta(0, 0);
 			if(mHandler->mHolding) mHandler->releaseParticles();
 			break;
 		case GLFW_MOUSE_BUTTON_RIGHT:
-			mPanning = 0;
+			mPanning = false;
 			break;
 		}
 	}

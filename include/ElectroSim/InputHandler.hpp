@@ -9,10 +9,12 @@
 
 static glm::vec2 MousePos;
 static glm::vec2 InitScenePos;
+static glm::vec2 selectStartPos;
 static float dx;
 static float dy;
 static Handler* mHandler;
 static bool mPanning;
+static bool mSelecting;
 static glm::mat4* mView;
 static glm::mat4* mProj;
 
@@ -23,7 +25,8 @@ GLFWwindow* mWindow;
 public:
 InputHandler(GLFWwindow* window, Handler* handler, glm::mat4* proj, glm::mat4* view);
 void getKeyPressed();
-void getSelectedArea(float* area);
+float* getSelectedArea();
+bool isSelecting();
 static void mousePosition(GLFWwindow* window, double xPos, double yPos);
 static void mousePressed(GLFWwindow* window, int button, int action, int mods);
 static void mouseScrolled(GLFWwindow * window, double xoffset, double yoffset);

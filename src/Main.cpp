@@ -197,9 +197,8 @@ int main(void) {
 	while (!glfwWindowShouldClose(window)) {
 		frameStart = ns() / 1000000000.0;
 
-		if(deltaTimeS > 0.001  )
 
-			mvp = proj * view;
+		mvp = proj * view;
 		shader.Bind();
 		shader.SetUniformMat4f("u_MVP",mvp);
 

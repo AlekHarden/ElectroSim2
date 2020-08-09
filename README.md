@@ -3,7 +3,7 @@
   
   ![alt text][logo]
 
-[logo]: https://github.com/alek145/ElectroSim2/tree/master/res/icon/Demo.PNG "Logo Title Text 2"
+[logo]: https://github.com/alek145/ElectroSim2/blob/master/res/icon/Demo.PNG "Logo Title Text 2"
   
 
 # Install Linux Dependencies

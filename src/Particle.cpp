@@ -67,12 +67,16 @@ void Particle::applyForces(Particle& p) {
 }
 
 // Calculate and apply collisions between self and another Particle
-void Particle::collide(Particle& p) {
+void Particle::collide(Particle& p,bool staticCollideOnly) {
 	// Figure out distance between particles
 	float dx = mX - p.mX;
 	float dy = mY - p.mY;
+	// 50% faster
+	if(dx > mRadius + p.mRadius || dy > mRadius + p.mRadius) return;
+
 	double dist = sqrt(dx * dx + dy * dy);
 
+	// if not overlapping, dont collide
 	if (dist > mRadius + p.mRadius) return;
 
 	// Calculate how much the particles have to move
@@ -87,7 +91,9 @@ void Particle::collide(Particle& p) {
 	p.mY += yOff;
 
 
-
+	if(staticCollideOnly) {
+		return;
+	}
 
 	//Do dynamic collisions
 	dx = mX - p.mX;
@@ -115,14 +121,14 @@ bool Particle::contains(double x, double y){
 	return ((mX-x) * (mX-x) + (mY-y) * (mY-y) < (mRadius * mRadius));
 }
 
-void Particle::tick() {
+void Particle::tick(double deltaTimeS) {
 	//std::cout << "charge " << mCharge << std::endl;
 	mAccX -= mVelX * FRICTION;
 	mAccY -= mVelY * FRICTION;
-	mVelX += mAccX;
-	mVelY += mAccY;
-	mX += mVelX;
-	mY += mVelY;
+	mVelX += mAccX * deltaTimeS;
+	mVelY += mAccY * deltaTimeS;
+	mX += mVelX * deltaTimeS;
+	mY += mVelY * deltaTimeS;
 	mAccX = 0;
 	mAccY = 0;
 }

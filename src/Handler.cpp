@@ -134,14 +134,13 @@ void Handler::setDelta(double delX, double delY){
 	mDelY = delY;
 }
 
-void Handler::tick(){
+void Handler::tick(double deltaTimeS){
 	for( int j = 0; j < mParticles.size(); j++) {
 		for( int i = j+1; i < mParticles.size(); i++) {
-			mParticles[i].collide(mParticles[j]);
+			mParticles[i].collide(mParticles[j],false);
 			mParticles[i].applyForces(mParticles[j]);
 		}
 		if(mParticles[j].mHeld) mParticles[j].tick(mDelX, mDelY);
-		else mParticles[j].tick();
-
+		else mParticles[j].tick(deltaTimeS);
 	}
 }

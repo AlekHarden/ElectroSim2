@@ -31,7 +31,7 @@ bool grabParticles(double xPos, double yPos);
 void releaseParticles();
 void deleteHeld();
 void setDelta(double delX, double delY);
-void tick();
+void tick(double deltaTimeS);
 };
 
 #endif

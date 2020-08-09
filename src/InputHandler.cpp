@@ -75,7 +75,7 @@ void InputHandler::mousePressed(GLFWwindow* window, int button, int action, int 
 
 			if(mHandler->grabParticles(MousePos.x, MousePos.y)) break;
 			else if(!mSelecting) {
-				std::cout << "selecting" <<std::endl;
+				//std::cout << "selecting" <<std::endl;
 				mSelecting = true;
 				selectStartPos = MousePos;
 			}

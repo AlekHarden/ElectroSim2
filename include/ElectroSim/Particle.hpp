@@ -21,11 +21,11 @@ Particle(const Particle& p);
 ~Particle() {
 };
 void applyForces(Particle& p);
-void collide(Particle& p);
+void collide(Particle& p,bool staticCollideOnl);
 bool contains(double x, double y);
 
 //virtual void render() = 0;
-void tick();
+void tick(double deltaTimeS);
 void tick(double delX, double delY);
 void test();
 };

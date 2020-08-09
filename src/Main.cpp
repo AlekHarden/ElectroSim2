@@ -36,6 +36,10 @@ void test() {
 	std::cout << "Thread Test" << std::endl;
 }
 
+void update(double deltaTimeS){
+
+}
+
 
 
 
@@ -49,6 +53,8 @@ int main(void) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
+
+
 	// ------- ENABLE DEBUG MODE -------
 	//glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
@@ -62,6 +68,8 @@ int main(void) {
 		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
 		//RefreshRate
 		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+
+
 		window = glfwCreateWindow(mode->width, mode->height, "ElectroSim2",glfwGetPrimaryMonitor(), NULL);
 		Width = (int)mode->width;
 		Height = (int)mode->height;
@@ -69,6 +77,7 @@ int main(void) {
 	}
 	else{
 		/* Create a windowed mode window and its OpenGL context */
+		glfwWindowHint(GLFW_RESIZABLE,false);
 		window = glfwCreateWindow(WIDTH,HEIGHT, "ElectroSim2",NULL, NULL);
 		Width = WIDTH;
 		Height = HEIGHT;
@@ -110,15 +119,10 @@ int main(void) {
 
 	//Spawn Particles in random Locations w/ Random Charges
 	for(int i = 0; i <100; i++ ) {
-
-		handler.addParticle(Particle(randNum() * Width * SCALE,randNum() * Height * SCALE, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.00001));
-		//list test
-		//tempP = new Particle((float)i*100,0,20,( rand()%2 == 0 ? 1 : -1 ) * 0.000);
+		//( rand()%2 == 0 ? 1 : -1 )
+		handler.addParticle(Particle(randNum() * Width * SCALE,randNum() * Height * SCALE, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.01));
 	}
 
-
-
-	//glm::mat4 proj = glm::ortho(-Width/2,Width/2,-Height/2,Height/2,1,1);
 	glm::mat4 proj;
 	glm::mat4 view;
 	glm::mat4 mvp;
@@ -176,19 +180,26 @@ int main(void) {
 	unsigned int framerate;
 	double elapsedTime;
 	double timeStart = ns() / 1000000000.0;
+	double frameStart;
+	double frameEnd;
+	double deltaTimeS;
 
 
 
 	// Spent 3 hours on this one line of code
 	glClearColor(0.1,0.1,0.1,1);
+
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-	// Make InputHandler
 	float* points;
 	unsigned int* indices;
 	while (!glfwWindowShouldClose(window)) {
-		mvp = proj * view;
+		frameStart = ns() / 1000000000.0;
+
+		if(deltaTimeS > 0.001  )
+
+			mvp = proj * view;
 		shader.Bind();
 		shader.SetUniformMat4f("u_MVP",mvp);
 
@@ -198,7 +209,7 @@ int main(void) {
 
 		//Draw Particles if they exist
 		if(handler.getNumPoints() != 0) {
-			handler.tick();
+			handler.tick(deltaTimeS);
 			points = handler.getPoints();
 			indices = handler.getIndices();
 			ib.SetIndices(indices,handler.getNumInd());
@@ -207,10 +218,9 @@ int main(void) {
 			free(points);
 			free(indices);
 		}
-		std::cout << "ms = " << mSelecting << std::endl;
 
+		//Draw Select Box
 		if(inHandler.isSelecting()) {
-			std::cout << "in" << std::endl;
 			points = inHandler.getSelectedArea();
 			Sib.SetIndices(square,6);
 			Svb.SetPoints((void*)points,sizeof(float) * 6 * 4);
@@ -236,10 +246,15 @@ int main(void) {
 			framerate = frames;
 			timeStart = ns() / 1000000000.0;
 			frames = 0;
-			//std::cout << "FPS: " << framerate << std::endl;
+			std::cout << "FPS: " << framerate << std::endl;
+			std::cout << "dt =  " << deltaTimeS << std::endl;
+
 		}
 
 		frames++;
+
+		frameEnd = ns() / 1000000000.0;
+		deltaTimeS = (frameEnd - frameStart);
 	}
 	glfwTerminate();
 	return 0;

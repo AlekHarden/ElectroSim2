@@ -1,3 +1,12 @@
+#ifndef OPENGLERROR_HPP
+#define OPENGLERROR_HPP
+
+
+#include <iostream>
+#include <ElectroSim/Constants.hpp>
+
+
+
 
 
 
@@ -12,7 +21,7 @@ void GLAPIENTRY MessageCallback(
 	const GLchar* message,
 	const void* userParam ){
 
-	if(type != GL_DEBUG_TYPE_ERROR) {
+	if(!DEBUG && type != GL_DEBUG_TYPE_ERROR) {
 		return;
 	}
 
@@ -63,3 +72,6 @@ void GLAPIENTRY MessageCallback(
 
 
 }
+
+
+#endif

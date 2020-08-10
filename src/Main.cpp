@@ -1,139 +1,55 @@
 #define GLEW_STATIC
-#if defined(_WIN32)
-	#define _WIN32_WINNT 0x0A00
-	#include <mingw/mingw.thread.h>
-#else // if defined(_WIN32)
-	#include <thread>
-#endif // if defined(_WIN32)
+
+
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <cstdlib>
-#include <nano/nano.hpp>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ElectroSim/Shader.hpp>
 #include <ElectroSim/Renderer.hpp>
 #include <ElectroSim/Handler.hpp>
 #include <ElectroSim/InputHandler.hpp>
-#include <ElectroSim/OpenGLError.hpp>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-
-static int Width;
-static int Height;
-
-
-// return random number from -0.5 to 0.5
-float randNum(){
-	return (((float)rand() - (float)RAND_MAX/2) / (float)RAND_MAX);
-}
+#include <Utils.hpp>
+#include <Display.hpp>
 
 
 
-void test() {
-	std::cout << "Thread Test" << std::endl;
-}
 
-void update(double deltaTimeS){
 
-}
+
 
 
 
 
 int main(void) {
-	srand(ns());
-	GLFWwindow *window;
+	utils::seed();
 
-	/* Initialize the library */
-	if (!glfwInit()) return -1;
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	glfwWindowHint(GLFW_OPENGL_PROFILE,GLFW_OPENGL_CORE_PROFILE);
-
-
-	// ------- ENABLE DEBUG MODE -------
-	//glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-
-
-	if(FULLSCREEN) {
-		/* Create a fullscreen mode window and its OpenGL context */
-		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-		//BitDepth
-		glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-		glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-		//RefreshRate
-		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-
-
-		window = glfwCreateWindow(mode->width, mode->height, "ElectroSim2",glfwGetPrimaryMonitor(), NULL);
-		Width = (int)mode->width;
-		Height = (int)mode->height;
-
-	}
-	else{
-		/* Create a windowed mode window and its OpenGL context */
-		glfwWindowHint(GLFW_RESIZABLE,false);
-		window = glfwCreateWindow(WIDTH,HEIGHT, "ElectroSim2",NULL, NULL);
-		Width = WIDTH;
-		Height = HEIGHT;
-	}
-
-	if (!window) {
-		glfwTerminate();
-		return -1;
-	}
-
-	/* Make the window's context current */
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(0);
-
-
-
-	if (glewInit() != GLEW_OK) {
-		std::cout << "glewInit Error" << std::endl;
-	}
-
-	// Let user know if its in debug mode.
-	GLint flags;
-	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
-		std::cout << "** DEBUG MODE **" << std::endl;
-	}
-
-	// Enable DebugMessageCallback
-	glEnable( GL_DEBUG_OUTPUT );
-	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-	glDebugMessageCallback( MessageCallback, 0 );
-
-	// Print OpenGL Version
-	std::cout << "\nOpenGL "<< glGetString(GL_VERSION) << std::endl;
-
-
-
+	Display display("ElectroSim2");
 	Handler handler;
+	InputHandler inHandler(display.getWindow(),&handler,display.getProj(),display.getView());
+
+	GLFWwindow* window = display.getWindow();
+	glm::mat4* proj = display.getProj();
+	glm::mat4* view = display.getView();
+	glm::mat4 mvp;
+
+
+
 
 	//Spawn Particles in random Locations w/ Random Charges
 	for(int i = 0; i <100; i++ ) {
-		//( rand()%2 == 0 ? 1 : -1 )
-		handler.addParticle(Particle(randNum() * Width * SCALE,randNum() * Height * SCALE, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.01));
+		handler.addParticle(Particle(utils::randNum() * display.getDimensions().x * DEFAULT_SCALE,utils::randNum() * display.getDimensions().y * DEFAULT_SCALE, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.01));
 	}
 
-	glm::mat4 proj;
-	glm::mat4 view;
-	glm::mat4 mvp;
-
-	//left                //right                  //bottom            //top      	//front //near
-	proj = glm::ortho(-Width/2.0f, Width/2.0f,-Height/2.0f, Height/2.0f, -1.0f, 1.0f);
-	view = glm::scale(glm::mat4(1.0f),glm::vec3(SCALE,SCALE,1.0f)) * glm::translate(glm::mat4(1.0f), glm::vec3(-PANX,-PANY,0));
 
 
 
-	InputHandler inHandler(window, &handler, &proj, &view);
+
+
 
 
 
@@ -186,11 +102,7 @@ int main(void) {
 
 
 
-	// Spent 3 hours on this one line of code
-	glClearColor(0.1,0.1,0.1,1);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
 	float* points;
 	unsigned int* indices;
@@ -198,7 +110,7 @@ int main(void) {
 		frameStart = ns() / 1000000000.0;
 
 
-		mvp = proj * view;
+		mvp = (*proj) * (*view);
 		shader.Bind();
 		shader.SetUniformMat4f("u_MVP",mvp);
 
@@ -246,8 +158,6 @@ int main(void) {
 			timeStart = ns() / 1000000000.0;
 			frames = 0;
 			std::cout << "FPS: " << framerate << std::endl;
-			std::cout << "dt =  " << deltaTimeS << std::endl;
-
 		}
 
 		frames++;

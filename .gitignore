@@ -7,3 +7,4 @@ cmake
 bin/*
 .clangd
 compile_commands.json
+*.ninja*

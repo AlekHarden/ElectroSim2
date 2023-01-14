@@ -42,7 +42,7 @@ int main(void) {
 
 	//Spawn Particles in random Locations w/ Random Charges
 	for(int i = 0; i <100; i++ ) {
-		handler.addParticle(Particle(utils::randNum() * display.getDimensions().x * DEFAULT_SCALE,utils::randNum() * display.getDimensions().y * DEFAULT_SCALE, 20,( rand()%2 == 0 ? 1 : -1 ) * 0.01));
+		handler.addParticle(Particle(utils::randNum() * display.getDimensions().x * DEFAULT_SCALE,utils::randNum() * display.getDimensions().y * DEFAULT_SCALE, 20,( rand()%2 == 0 ? 1 : -1 ) * CHARGE));
 	}
 
 

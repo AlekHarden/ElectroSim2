@@ -1,7 +1,7 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <nano/nano.h>
+#include <nano/nano.hpp>
 #include <cstdlib>
 
 

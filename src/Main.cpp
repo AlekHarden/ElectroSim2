@@ -88,7 +88,7 @@ int main(void) {
 
 
 	Renderer renderer;
-	Shader shader("../res/shaders/basic/vertex.vsh","../res/shaders/basic/fragment.fsh");
+	Shader shader("vertex.vsh","fragment.fsh");
 	shader.Bind();
 	shader.SetUniformMat4f("u_MVP",mvp);
 

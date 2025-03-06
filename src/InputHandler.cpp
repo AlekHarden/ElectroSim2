@@ -111,13 +111,25 @@ void InputHandler::mousePressed(GLFWwindow* window, int button, int action, int 
 }
 
 void InputHandler::mouseScrolled(GLFWwindow * window, double xoffset, double yoffset){
+	// yoffset is the scroll wheeel value.
+	// for mice, yoffset is either {-1,1}.
+	// for laptop tackpads, yoffset is smooth within [-1,1].
+
+	// (percantage) Added to 1 to get scaleFactor
+	static const double zoomSpeed = 0.1;
+
 	float scale = 1 / (*mView)[0][0];
 	float panx = (*mView)[3][0];
 	float pany = (*mView)[3][1];
 
 	glm::vec3 offset (panx + MousePos.x/scale, pany + MousePos.y/scale, 0);
 
-	*mView = glm::translate(glm::mat4(1.0f), offset) * glm::scale(glm::mat4(1.0f), glm::vec3( (yoffset == -1 ? 0.9 : 1/0.9 ), (yoffset == -1 ? 0.9 : 1/0.9 ), 0)) * glm::translate(glm::mat4(1.0f),-1.0f * offset) * (*mView);
+	double scaleFactor = 1 + abs(yoffset * zoomSpeed);
+	if (yoffset < 0){
+		scaleFactor = 1 / scaleFactor;
+	}
+
+	*mView = glm::translate(glm::mat4(1.0f), offset) * glm::scale(glm::mat4(1.0f), glm::vec3(scaleFactor, scaleFactor, 0)) * glm::translate(glm::mat4(1.0f),-1.0f * offset) * (*mView);
 }
 
 void InputHandler::keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods){

@@ -40,9 +40,17 @@ Within MSYS2 terminal, install the following :
 
 ### Windows
 
-In the root of the repository:
+In the root of the repository, run the following commands to set up the build directory:
 
  1. `mkdir build`
  2. `cd build`
  3. `cmake ..`
+
+In the build directory, run the following command to build (and re-build) the project:
+
  4. `cmake --build .`
+
+After building, cd into the bin directory to execute the project:
+
+ 5. `cd bin`
+ 6. `.\ElectroSim2.exe`
